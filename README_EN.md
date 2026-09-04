@@ -1,26 +1,30 @@
 <div align="center">
 
-<img src="assets/logo.svg" alt="video-talkcraft logo" width="150">
+<img src="assets/logo.svg" alt="easegen-video-talkcraft logo" width="150">
 
-<h1>video-talkcraft</h1>
+<h1>easegen-video-talkcraft</h1>
 
 [![Gallery](https://img.shields.io/badge/Gallery-live%20previews-7A5AF8)](https://vincentwei1021.github.io/video-talkcraft/)
 [![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue)](LICENSE)
 
-**An agent skill for crafting high-quality voiceover-driven videos: word-level voiceover sync · 79 motion recipe cards · a 7-layer anti-slideshow shot system · triple-gate QA**
+**A local-first digital-human video Skill: IndexTTS2 · local avatar runtimes · 79 motion cards · Remotion · triple-gate QA**
 
 [中文](README.md) | [English](README_EN.md)
 
 </div>
 
-**video-talkcraft** is the voiceover-driven explainer installment of the
-[video-shotcraft](https://github.com/Vincentwei1021/video-shotcraft) series:
-an AI agent skill that turns Claude Code or Codex into a motion-design studio
-for narrated explainer videos. Give it a narration script and a finished
-voiceover, and it aligns word-level timestamps locally, storyboards every
-semantic beat into a SHOTBOOK, then renders a polished explainer with
-[Remotion](https://www.remotion.dev/) — kinetic type, evidence screenshots,
-camera moves, plain-cut subtitles, and film-grade SFX, all locked to the voice.
+**easegen-video-talkcraft** is an Easegen-enhanced distribution of
+[Vincentwei1021/video-talkcraft](https://github.com/Vincentwei1021/video-talkcraft).
+It preserves the upstream 79 motion cards, SHOTBOOK system, workbench, and QA gates,
+while adding a local-first Plus pipeline that can turn a script, an authorized
+voice reference, and avatar footage into IndexTTS2 narration and locally generated
+presenter footage before rendering with [Remotion](https://www.remotion.dev/).
+
+> This repository does not bundle model weights, CUDA environments, third-party native binaries,
+> private voices, or avatar assets, and it has no automatic remote-GPU fallback. Upstream code
+> remains under PolyForm Noncommercial 1.0.0; commercial use requires upstream authorization.
+
+![easegen-video-talkcraft: IndexTTS2 and local digital humans](assets/easegen-video-talkcraft-cover.png)
 
 > The methodology docs and recipe cards are written in Chinese — the toolkit is
 > built Chinese-narration-first (mixed Chinese/English narration is fully
@@ -29,6 +33,18 @@ camera moves, plain-cut subtitles, and film-grade SFX, all locked to the voice.
 🖼️ [**Browse all 79 motion previews in the live Gallery »**](https://vincentwei1021.github.io/video-talkcraft/)
 
 [![video-talkcraft live gallery](assets/gallery-en.png)](https://vincentwei1021.github.io/video-talkcraft/)
+
+## ✨ Easegen Plus additions
+
+- Local IndexTTS2 narration on CPU/CUDA and other devices supported upstream.
+- `heygem-local` as the recommended Phase 1 GPU backend, HeyGem API compatibility,
+  and an experimental DH_live CPU path.
+- A standalone adapter that keeps model runtimes isolated from Easegen's production
+  Redis, API, object-storage, and scheduler code.
+- Deterministic artifacts and acceptance checks for audio, presenter video, timing,
+  face-safe zones, and the TalkCraft handoff.
+
+See [the Plus pipeline reference](references/plus-pipeline.md) for setup and honest hardware boundaries.
 
 ## 🆕 What's new
 
@@ -94,21 +110,21 @@ camera moves, plain-cut subtitles, and film-grade SFX, all locked to the voice.
 In Claude Code / Codex or a similar agent, just say:
 
 ```text
-Install this skill for me: https://github.com/Vincentwei1021/video-talkcraft
+Install this skill for me: https://github.com/taoofagi/easegen-video-talkcraft
 ```
 
 Or install with the [skills](https://skills.sh/) CLI / manually:
 
 ```bash
-npx skills add Vincentwei1021/video-talkcraft
+npx skills add taoofagi/easegen-video-talkcraft
 ```
 
 ```bash
-git clone https://github.com/Vincentwei1021/video-talkcraft.git
-cd video-talkcraft
-ln -s "$(pwd)" ~/.claude/skills/video-talkcraft   # Claude Code
+git clone https://github.com/taoofagi/easegen-video-talkcraft.git
+cd easegen-video-talkcraft
+ln -s "$(pwd)" ~/.claude/skills/easegen-video-talkcraft   # Claude Code
 # or
-ln -s "$(pwd)" ~/.codex/skills/video-talkcraft    # Codex
+ln -s "$(pwd)" ~/.codex/skills/easegen-video-talkcraft    # Codex
 ```
 
 Environment (the agent will set this up as needed):
@@ -123,8 +139,9 @@ Environment (the agent will set this up as needed):
 Then make requests like:
 
 ```text
-Use video-talkcraft to turn this narration script + voiceover.wav into a video.
+Use easegen-video-talkcraft to turn this narration script + voiceover.wav into a video.
 Make a 100-second explainer about <topic>; here is the script and the audio.
+Use the Plus pipeline to turn this script, voice reference, and avatar clip into a digital-human video.
 ```
 
 ## 🎞 What you bring vs. what it does
@@ -151,7 +168,7 @@ Make a 100-second explainer about <topic>; here is the script and the audio.
 ## 🗂 Repository structure
 
 ```text
-video-talkcraft/
+easegen-video-talkcraft/
 ├── SKILL.md                    # Agent entry point: the 8-step pipeline and hard rules
 ├── references/
 │   ├── design-language.md      # Default visual system (palette/type/layout/subtitles)
@@ -205,6 +222,10 @@ research use. **Any commercial use of the toolkit requires prior
 authorization** — email
 [vincentwei1021@gmail.com](mailto:vincentwei1021@gmail.com) or open
 a GitHub issue.
+
+This repository preserves the upstream Git history, Required Notice, and license.
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the runtime boundary of
+the Easegen additions. Source availability does not grant commercial-use or model-redistribution rights.
 
 **Videos you produce with this skill belong to you.** If it helped, a mention
 of the author's accounts in your video description is appreciated — and

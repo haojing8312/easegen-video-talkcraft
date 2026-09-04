@@ -1,0 +1,4 @@
+interface:
+  display_name: "Easegen 口播视频 Plus"
+  short_description: "用本地 IndexTTS2、GPU/CPU 数字人和 TalkCraft 制作口播视频"
+  default_prompt: "使用 $easegen-video-talkcraft 将我的口播稿、音色参考和头像视频制作成数字人口播成片。"

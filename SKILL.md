@@ -1,9 +1,9 @@
 ---
-name: video-talkcraft
-description: 终极口播视频 skill：中文口播稿 + 成品配音 → CPU 字级时间戳 → SHOTBOOK 层矩阵分镜 → Remotion 电影感成片（横屏默认/竖屏）。当用户要"做口播视频"、"解说/科普视频"、"把文案变成视频"、"给配音配画面动效"时使用。TTS 合成与数字人生成技术不在本 skill 内（配音和人物素材是输入）。含统一视觉语言（Apple 范式）、79 张动效配方卡、镜头三面分层工作单、七层镜头反PPT系统（CameraRig/视差/让位/环境）、六式运动承接转场（每式一卡）、长镜头世界画布、anime.js+three.js 桥、自动静止检测 + 独立 subagent 评估循环。
+name: easegen-video-talkcraft
+description: 本地优先的数字人口播视频 Skill：既可接收成品配音与人物素材，也可用 Plus 流程调用 IndexTTS2 和可切换的本地数字人后端，再通过 CPU 字级时间戳、SHOTBOOK、79 张动效卡与 Remotion 生成横屏或竖屏成片。用于数字人口播、解说、科普和配音驱动画面任务；不包含第三方模型权重或云端 GPU 服务。
 ---
 
-# video-talkcraft — 口播视频 skill
+# easegen-video-talkcraft — 本地数字人口播视频 Skill
 
 三大来源合体：**管线**（配音→字级时间戳→Remotion，实测跑通）+ **词汇**（79 张动效配方卡：23 调研 + 8 实战★ + 9 真实视频挖掘◆ + 18 remocn 适配◇ + 20 参考图复刻◈ + 1 社区贡献，全配可播 demo）+ **镜头**（七层模型反 PPT 系统，多轮调试验证）+ **视觉语言**（Apple 范式默认版）。
 
@@ -15,9 +15,23 @@ description: 终极口播视频 skill：中文口播稿 + 成品配音 → CPU �
 ## 流程
 
 ```
-① 文案 → ② 配音输入+时间戳(本机CPU) → ③ 素材 → ④ SHOTBOOK 层矩阵 → ⑤ 实现(全局系统先行)
+① 文案 → ② 成品配音或 IndexTTS2 → ②½ 人物素材或本地数字人 → CPU 时间戳 → ③ 其他素材
+                                → ④ SHOTBOOK 层矩阵 → ⑤ 实现(全局系统先行)
                                 → ⑥ 渲染 → ⑦ 三重验收（机器闸全过 + 1 轮审片修 P0/P1）→ ⑧ 交付（可选续审 ≤3 轮）
 ```
+
+## Plus 流程：IndexTTS2 + 本地数字人
+
+当用户只有口播稿、授权音色参考和单人人物母片，希望 Skill 同时生成配音与人物口型时，读取
+[`references/plus-pipeline.md`](references/plus-pipeline.md)，使用 `scripts/plus_pipeline.py` 初始化、预检并运行。
+
+- 所有推理在用户自己的电脑上运行，不接入远程 GPU 租赁或自动云端回退。
+- IndexTTS2 可选择 CPU、CUDA 等上游支持的设备；CPU 是兼容路径，不承诺实时速度。
+- `heygem-local` 是第一阶段推荐后端：Skill 内置独立适配层，外部 `easegen-digitalhuman-v2`
+  仅提供权重、原生扩展和隔离环境；不得修改其生产 Redis、API、对象存储或调度代码。
+- `heygem-api` 兼容已有的本地 HeyGem 服务；`dh-live` 是实验性 CPU 后端。
+- 未通过音视频流、时长、完整解码、人脸安全区和字级对齐检查时，不得把结果描述为成功成片。
+- Skill 不分发第三方模型、原生二进制、私人音色或头像素材，发布边界见 `THIRD_PARTY_NOTICES.md`。
 
 ## ⓪ 画幅与视觉语言（开工先定，全流程引用）
 - **画幅默认横屏 1920×1080**（用户偏好）；明确要发抖音/竖屏渠道才用 1080×1920
@@ -32,8 +46,8 @@ description: 终极口播视频 skill：中文口播稿 + 成品配音 → CPU �
 - 先调研核实事实，列"事实红线清单"（不可说错的数字/未验证数据不引用）
 
 ## ② 配音输入 + 字级时间戳（本机 CPU）
-**配音是输入，不是本 skill 的产物**（2026-08-28 定版）：真人录音或任何 TTS 皆可，
-skill 不含合成技术。输入 = 一条完整配音（wav/mp3）+ 与之逐字一致的口播稿。
+标准模式把真人录音或任意 TTS 成品作为输入；Plus 模式可以通过用户独立安装的 IndexTTS2 生成配音。
+两种模式进入对齐阶段时都必须提供一条完整配音（wav/mp3）及与之逐字一致的口播稿。
 ```bash
 pip install zhconv pypinyin sherpa-onnx soundfile numpy   # 默认后端 FireRedASR2-CTC int8 的全部依赖
 # 首次：下载模型 767MB（model.int8.onnx + tokens.txt）放 ~/.cache/koubo/<模型名>/，地址见脚本头注释
@@ -305,6 +319,7 @@ X [`@VincentWei93`](https://x.com/VincentWei93) ·
 | 选动效/查参数和坑 | `references/taxonomy.md` → `references/cards/` → `template/cards/`（tsx 源码）+ `demos/`/`gallery/`（预览） |
 | 找素材 | `references/broll-sources.md` |
 | 人物素材（输入规格 / CPU 抠像 / 人脸安全区）· 与 B-roll 同屏怎么摆 | `references/host-footage.md` + `scripts/face_bbox.py` |
+| 从文稿生成配音与数字人 | `references/plus-pipeline.md` → `scripts/plus_pipeline.py`；IndexTTS2 CPU/CUDA + `heygem-local` / HeyGem API GPU + 实验性 DH_live CPU |
 | 新增配方卡 | `references/demo-spec.md`，验证 `node scripts/verify-demo.mjs <slug>` |
 | 可复制代码 | `template/cards/`（79 卡逐卡自包含 tsx）、`template/motion-systems/`（相机/让位/环境/桥）、`template/components/`（字幕/花字/铅笔/吉祥物） |
 | 成片后人工微调 / 导出 | `workbench/`（剪映式工作台：多轨时间线 + 全卡参数化 + 成片拆解 + Remotion 渲染导出） |

@@ -1,28 +1,41 @@
 <div align="center">
 
-<img src="assets/logo.svg" alt="video-talkcraft logo" width="150">
+<img src="assets/logo.svg" alt="easegen-video-talkcraft logo" width="150">
 
-<h1>video-talkcraft</h1>
+<h1>easegen-video-talkcraft</h1>
 
 [![Gallery](https://img.shields.io/badge/Gallery-live%20previews-7A5AF8)](https://vincentwei1021.github.io/video-talkcraft/)
 [![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue)](LICENSE)
 [![WeChat](https://img.shields.io/badge/WeChat-%E8%AE%A8%E8%AE%BA%E7%BE%A4-07C160?logo=wechat&logoColor=white)](assets/wechat-group.jpg)
 
-**口播视频的 agent skill：字级配音同步 · 79 张动效配方卡 · 七层反 PPT 镜头系统 · 三重验收**
+**本地数字人口播视频 Skill：IndexTTS2 · 本地数字人 · 79 张动效卡 · Remotion · 三重验收**
 
 [中文](README.md) | [English](README_EN.md)
 
 </div>
 
-**video-talkcraft** 是 [video-shotcraft](https://github.com/Vincentwei1021/video-shotcraft)
-系列的口播视频篇：一个把 Claude Code / Codex 变成口播视频动效工作室的 AI agent skill。
-给它一份口播稿和一条成品配音，它在本机对齐字级时间戳、把每个语义拍写进 SHOTBOOK
-分镜，然后用 [Remotion](https://www.remotion.dev/) 渲出高质量的解说成片——动态字卡、
-证据截图、运镜、素排字幕、影视级音效，全部锁在人声上。
+**easegen-video-talkcraft** 是 [Vincentwei1021/video-talkcraft](https://github.com/Vincentwei1021/video-talkcraft)
+的 Easegen 增强发行版。它完整保留上游的 79 张动效卡、SHOTBOOK 镜头体系、工作台与三重验收，
+新增本地优先的 Plus 管线：从口播稿、授权音色参考和人物母片出发，调用用户独立安装的
+IndexTTS2 与本地数字人运行时，再用 [Remotion](https://www.remotion.dev/) 合成可复现成片。
+
+> 本仓库不包含模型权重、CUDA 环境、第三方原生二进制、私人音色或头像素材，也不接入远程 GPU 租赁。
+> 上游代码继续遵循 PolyForm Noncommercial 1.0.0，商业使用需取得原作者授权。
+
+![easegen-video-talkcraft：IndexTTS2 与本地数字人](assets/easegen-video-talkcraft-cover.png)
 
 🖼️ [**在线画廊：79 张动效预览一页全览 »**](https://vincentwei1021.github.io/video-talkcraft/)
 
 [![video-talkcraft 在线画廊](assets/gallery-zh.png)](https://vincentwei1021.github.io/video-talkcraft/)
+
+## ✨ Easegen Plus 新增能力
+
+- **IndexTTS2 本地配音**：支持 CPU/CUDA 等上游设备；CPU 可运行但不承诺实时速度。
+- **本地数字人后端**：推荐 `heygem-local` GPU 路径，兼容 HeyGem API，并提供实验性 DH_live CPU 路径。
+- **独立运行边界**：Skill 自带 standalone 适配层，模型与生产版 `easegen-digitalhuman-v2` 保持隔离。
+- **可复现交付**：固定输出配音、数字人、时间戳、人物安全区、运行状态和 TalkCraft 输入清单。
+
+详细配置与验收边界见 [Plus 管线文档](references/plus-pipeline.md)。
 
 ## 🆕 更新（What's new）
 
@@ -74,21 +87,21 @@
 在 Claude Code / Codex 里直接说：
 
 ```text
-帮我安装这个 skill：https://github.com/Vincentwei1021/video-talkcraft
+帮我安装这个 skill：https://github.com/taoofagi/easegen-video-talkcraft
 ```
 
 或用 [skills](https://skills.sh/) CLI / 手动安装：
 
 ```bash
-npx skills add Vincentwei1021/video-talkcraft
+npx skills add taoofagi/easegen-video-talkcraft
 ```
 
 ```bash
-git clone https://github.com/Vincentwei1021/video-talkcraft.git
-cd video-talkcraft
-ln -s "$(pwd)" ~/.claude/skills/video-talkcraft   # Claude Code
+git clone https://github.com/taoofagi/easegen-video-talkcraft.git
+cd easegen-video-talkcraft
+ln -s "$(pwd)" ~/.claude/skills/easegen-video-talkcraft   # Claude Code
 # 或
-ln -s "$(pwd)" ~/.codex/skills/video-talkcraft    # Codex
+ln -s "$(pwd)" ~/.codex/skills/easegen-video-talkcraft    # Codex
 ```
 
 环境（agent 会按需自行配置）：
@@ -102,8 +115,9 @@ ln -s "$(pwd)" ~/.codex/skills/video-talkcraft    # Codex
 然后这样下需求：
 
 ```text
-用 video-talkcraft 把这份口播稿 + voiceover.wav 做成视频。
+用 easegen-video-talkcraft 把这份口播稿 + voiceover.wav 做成视频。
 做一条 100 秒的 <话题> 解说，稿子和音频在这里。
+用 Plus 流程把这份稿子、音色参考和人物母片生成数字人口播视频。
 ```
 
 ## 🎞 你提供什么 vs. 它做什么
@@ -112,7 +126,9 @@ ln -s "$(pwd)" ~/.codex/skills/video-talkcraft    # Codex
 | --- | --- |
 | 口播稿 | 字级时间戳对齐，逐句质检标记 |
 | 成品配音——任何 TTS 或真人录音 | SHOTBOOK 分镜：语义拍、层矩阵、排版预算 |
+| 或：授权音色参考 + 本地 IndexTTS2 | Plus 管线生成完整配音并保留运行证据 |
 | 可选的人物素材——普通实拍视频即可（抠像 + 人脸安全区工具已含，绿幕抠得最干净） | Remotion 实现：四套全局系统（相机/视差/让位/环境）、转场、音效落位 |
+| 或：人物母片 + 独立安装的数字人运行时 | 生成并检查口型同步人物视频；不分发第三方权重 |
 | 可选的 B-roll / 截图 | 渲染 + 三重验收（机器闸全过 + 一轮独立审片修完 P0/P1 即交付，可选续审累计 ≤3 轮），响度归一交付 |
 
 ## 📦 库里有什么
@@ -130,7 +146,7 @@ ln -s "$(pwd)" ~/.codex/skills/video-talkcraft    # Codex
 ## 🗂 目录结构
 
 ```text
-video-talkcraft/
+easegen-video-talkcraft/
 ├── SKILL.md                    # agent 入口：八步管线与硬规则
 ├── references/
 │   ├── design-language.md      # 默认视觉系统（色板/字阶/布局/字幕）
@@ -177,6 +193,9 @@ agent 读方法论、选动效配方卡、写 [Remotion](https://www.remotion.de
 [PolyForm Noncommercial 1.0.0](LICENSE)——个人、教育、研究用途免费。
 **将本工具用于任何商业用途需事先获得授权**——发邮件至
 [vincentwei1021@gmail.com](mailto:vincentwei1021@gmail.com) 或提 GitHub issue 联系。
+
+本仓库保留上游 Git 历史、Required Notice 与许可条款；Easegen 新增适配代码的第三方运行时边界见
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。开放源码可见不等于获得商业使用或模型再分发授权。
 
 **用本 skill 做出的视频归你所有。** 如果它帮到了你，欢迎在视频简介里
 @ 一下作者的账号——非强制，但对作者是最好的支持。

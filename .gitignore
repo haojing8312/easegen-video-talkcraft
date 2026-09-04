@@ -15,6 +15,17 @@ demos/_lib/sfx/picked/
 
 # 依赖
 node_modules/
+.local/
+
+# Optional local model/runtime material never belongs in this repository
+models/
+weights/
+checkpoints/
+*.onnx
+*.pth
+*.pt
+*.ckpt
+*.safetensors
 
 # 工具缓存/截图 + 制作端小工具（CLAUDE.md「制作端工具不进库」）
 tools/
