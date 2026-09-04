@@ -22,7 +22,7 @@ IndexTTS2 与本地数字人运行时，再用 [Remotion](https://www.remotion.d
 > 本仓库不包含模型权重、CUDA 环境、第三方原生二进制、私人音色或头像素材，也不接入远程 GPU 租赁。
 > 上游代码继续遵循 PolyForm Noncommercial 1.0.0，商业使用需取得原作者授权。
 
-![easegen-video-talkcraft：IndexTTS2 与本地数字人](assets/easegen-video-talkcraft-cover.png)
+![easegen-video-talkcraft：完全本地，从口播稿生成高质量数字人成片](assets/easegen-video-talkcraft-cover-v2.png)
 
 ## 🙏 特别致谢 video-talkcraft
 
@@ -51,7 +51,7 @@ Remotion 工程模板、动效工作台和机器验收方法。Easegen Plus 的 
 
 HeyGem 运行时和模型体积较大，因此不会直接提交到本仓库。你可以选择：
 
-1. **联系 Easegen 维护者**：通过本仓库 Issue 咨询付费部署、环境配置、低显存适配或经授权的独立运行包。
+1. **联系 Easegen 维护者**：扫码添加作者微信（请备注 `easegen`），咨询付费部署、环境配置、低显存适配或经授权的独立运行包。
    付费内容是安装与适配服务；第三方模型、镜像和商业授权仍以各自许可证及授权文件为准。
 2. **自行部署官方版本**：从 **[duixcom/Duix-Avatar](https://github.com/duixcom/Duix-Avatar)**
    拉取源码，按官方文档准备 Docker/模型环境，再选择以下一种接入方式：
@@ -63,6 +63,12 @@ HeyGem 运行时和模型体积较大，因此不会直接提交到本仓库。�
 > `--dh-api-base`；两条路径都需要按上述契约完成适配。
 
 无论选择哪种方式，都必须自行核对 HeyGem/Duix 的代码、模型、Docker 镜像与商业使用条款。
+
+<p align="center">
+  <img src="assets/easegen-author-wechat.png" alt="Easegen 作者微信二维码" width="280">
+  <br>
+  <sub>项目合作与技术交流：添加微信时请备注 easegen</sub>
+</p>
 
 ## 🆕 更新（What's new）
 

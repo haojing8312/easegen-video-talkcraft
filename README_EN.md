@@ -24,7 +24,7 @@ presenter footage before rendering with [Remotion](https://www.remotion.dev/).
 > private voices, or avatar assets, and it has no automatic remote-GPU fallback. Upstream code
 > remains under PolyForm Noncommercial 1.0.0; commercial use requires upstream authorization.
 
-![easegen-video-talkcraft: IndexTTS2 and local digital humans](assets/easegen-video-talkcraft-cover.png)
+![easegen-video-talkcraft: fully local, from narration script to a high-quality digital-human video](assets/easegen-video-talkcraft-cover-v2.png)
 
 ## 🙏 Special thanks to video-talkcraft
 
@@ -62,7 +62,7 @@ See [the Plus pipeline reference](references/plus-pipeline.md) for setup and hon
 
 The HeyGem runtime and model files are too large to commit to this repository. Choose one of these paths:
 
-1. **Contact the Easegen maintainers**: open an Issue to discuss paid deployment, environment setup,
+1. **Contact the Easegen maintainer**: scan the WeChat QR code below and include `easegen` in the request to discuss paid deployment, environment setup,
    low-VRAM adaptation, or an independently delivered runtime package where redistribution is authorized.
    The paid service covers installation and integration; third-party model, image, and commercial-use rights
    remain governed by their own licenses and authorization documents.
@@ -76,6 +76,12 @@ The HeyGem runtime and model files are too large to commit to this repository. C
 > passed directly as the current `--dh-api-base`; both paths require the documented contract adaptation.
 
 In both cases, review the current HeyGem/Duix code, model, Docker-image, redistribution, and commercial-use terms.
+
+<p align="center">
+  <img src="assets/easegen-author-wechat.png" alt="Easegen maintainer WeChat QR code" width="280">
+  <br>
+  <sub>Project collaboration and technical discussion: include easegen in your WeChat request</sub>
+</p>
 
 ## 🆕 What's new
 
