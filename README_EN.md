@@ -26,6 +26,18 @@ presenter footage before rendering with [Remotion](https://www.remotion.dev/).
 
 ![easegen-video-talkcraft: IndexTTS2 and local digital humans](assets/easegen-video-talkcraft-cover.png)
 
+## 🙏 Special thanks to video-talkcraft
+
+This project is built on Vincent Wei's
+**[video-talkcraft](https://github.com/Vincentwei1021/video-talkcraft)**.
+We sincerely thank Vincent Wei and the upstream contributors for the narration-video workflow,
+79 motion recipe cards, SHOTBOOK cinematography system, Remotion templates, motion workbench,
+and machine-verifiable QA methodology. Easegen Plus adds IndexTTS2 and local digital-human
+integration on top of that foundation.
+
+If this project helps you, please also follow and support the upstream author:
+**[GitHub · Vincentwei1021/video-talkcraft](https://github.com/Vincentwei1021/video-talkcraft)**.
+
 > The methodology docs and recipe cards are written in Chinese — the toolkit is
 > built Chinese-narration-first (mixed Chinese/English narration is fully
 > supported). Agents read them natively.

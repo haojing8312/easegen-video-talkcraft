@@ -1,4 +1,14 @@
-# Third-party runtime boundary
+# Third-party notices
+
+## Upstream foundation
+
+`easegen-video-talkcraft` is derived from
+[Vincentwei1021/video-talkcraft](https://github.com/Vincentwei1021/video-talkcraft).
+We thank Vincent Wei and the upstream contributors for the core workflow, motion-card library,
+SHOTBOOK system, Remotion templates, workbench, and QA methodology. The upstream Required Notice
+and PolyForm Noncommercial 1.0.0 terms are preserved in this repository's `LICENSE` file.
+
+## Optional runtime boundary
 
 `easegen-video-talkcraft` orchestrates optional software installed separately by the user. Those runtimes are not included in this Skill and are not relicensed by this repository.
 

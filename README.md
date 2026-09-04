@@ -24,6 +24,16 @@ IndexTTS2 与本地数字人运行时，再用 [Remotion](https://www.remotion.d
 
 ![easegen-video-talkcraft：IndexTTS2 与本地数字人](assets/easegen-video-talkcraft-cover.png)
 
+## 🙏 特别致谢 video-talkcraft
+
+本项目基于 Vincent Wei 开源的
+**[video-talkcraft](https://github.com/Vincentwei1021/video-talkcraft)** 构建。
+衷心感谢 Vincent Wei 及其社区贡献者提供口播视频工作流、79 张动效配方卡、SHOTBOOK 镜头体系、
+Remotion 工程模板、动效工作台和机器验收方法。Easegen Plus 的 IndexTTS2 与本地数字人能力是在这些成果之上扩展完成的。
+
+如果本项目对你有帮助，也请前往上游仓库关注并支持原作者：
+**[GitHub · Vincentwei1021/video-talkcraft](https://github.com/Vincentwei1021/video-talkcraft)**。
+
 🖼️ [**在线画廊：79 张动效预览一页全览 »**](https://vincentwei1021.github.io/video-talkcraft/)
 
 [![video-talkcraft 在线画廊](assets/gallery-zh.png)](https://vincentwei1021.github.io/video-talkcraft/)
