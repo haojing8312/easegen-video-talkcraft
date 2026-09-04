@@ -47,6 +47,23 @@ Remotion 工程模板、动效工作台和机器验收方法。Easegen Plus 的 
 
 详细配置与验收边界见 [Plus 管线文档](references/plus-pipeline.md)。
 
+## 🧩 获取 HeyGem / 数字人运行时
+
+HeyGem 运行时和模型体积较大，因此不会直接提交到本仓库。你可以选择：
+
+1. **联系 Easegen 维护者**：通过本仓库 Issue 咨询付费部署、环境配置、低显存适配或经授权的独立运行包。
+   付费内容是安装与适配服务；第三方模型、镜像和商业授权仍以各自许可证及授权文件为准。
+2. **自行部署官方版本**：从 **[duixcom/Duix-Avatar](https://github.com/duixcom/Duix-Avatar)**
+   拉取源码，按官方文档准备 Docker/模型环境，再选择以下一种接入方式：
+   - 在官方 `/easy/submit`、`/easy/query` API 前增加 Easegen 兼容层，转换为
+     `/api/v1/easedh/task/create`、`/api/v1/easedh/task/result` 契约，再使用 `heygem-api`；
+   - 按 `EASEGEN_RESULT_JSON` 契约改造本地推理入口，然后使用 `heygem-local` 适配层。
+
+> 官方仓库不能直接作为 `--dh-engine-root` 使用，官方 `8383` 端口也不能直接填入当前
+> `--dh-api-base`；两条路径都需要按上述契约完成适配。
+
+无论选择哪种方式，都必须自行核对 HeyGem/Duix 的代码、模型、Docker 镜像与商业使用条款。
+
 ## 🆕 更新（What's new）
 
 **2026-09-02**

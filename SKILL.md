@@ -30,6 +30,8 @@ description: 本地优先的数字人口播视频 Skill：既可接收成品配�
 - `heygem-local` 是第一阶段推荐后端：Skill 内置独立适配层，外部 `easegen-digitalhuman-v2`
   仅提供权重、原生扩展和隔离环境；不得修改其生产 Redis、API、对象存储或调度代码。
 - `heygem-api` 兼容已有的本地 HeyGem 服务；`dh-live` 是实验性 CPU 后端。
+- HeyGem 运行时可由用户自行从 `https://github.com/duixcom/Duix-Avatar` 拉取并按官方许可改造，
+  也可联系 Easegen 维护者获取付费部署/适配支持；付费服务不得被描述成自动包含第三方模型或商业授权。
 - 未通过音视频流、时长、完整解码、人脸安全区和字级对齐检查时，不得把结果描述为成功成片。
 - Skill 不分发第三方模型、原生二进制、私人音色或头像素材，发布边界见 `THIRD_PARTY_NOTICES.md`。
 

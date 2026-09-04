@@ -58,6 +58,25 @@ If this project helps you, please also follow and support the upstream author:
 
 See [the Plus pipeline reference](references/plus-pipeline.md) for setup and honest hardware boundaries.
 
+## 🧩 Obtaining a HeyGem / avatar runtime
+
+The HeyGem runtime and model files are too large to commit to this repository. Choose one of these paths:
+
+1. **Contact the Easegen maintainers**: open an Issue to discuss paid deployment, environment setup,
+   low-VRAM adaptation, or an independently delivered runtime package where redistribution is authorized.
+   The paid service covers installation and integration; third-party model, image, and commercial-use rights
+   remain governed by their own licenses and authorization documents.
+2. **Build from the official project**: clone
+   **[duixcom/Duix-Avatar](https://github.com/duixcom/Duix-Avatar)**, follow its Docker/model setup,
+   and either add an Easegen compatibility layer that maps the official `/easy/submit` and `/easy/query`
+   endpoints to `/api/v1/easedh/task/create` and `/api/v1/easedh/task/result`, or adapt a local inference
+   entrypoint to the `EASEGEN_RESULT_JSON` contract used by `heygem-local`.
+
+> The official checkout cannot be used directly as `--dh-engine-root`, and its port `8383` cannot be
+> passed directly as the current `--dh-api-base`; both paths require the documented contract adaptation.
+
+In both cases, review the current HeyGem/Duix code, model, Docker-image, redistribution, and commercial-use terms.
+
 ## 🆕 What's new
 
 **2026-09-02**

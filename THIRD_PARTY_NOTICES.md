@@ -22,3 +22,5 @@ The optional integrations include:
 - FFmpeg, Remotion, and their dependencies.
 
 Before redistributing a runtime, model, native library, voice reference, or avatar asset, consult its own license and preserve all required notices. In particular, do not treat availability in a community bundle or download link as permission to redistribute or use commercially.
+
+Users may either contact the Easegen maintainers for paid installation/adaptation support or build from the current official [duixcom/Duix-Avatar](https://github.com/duixcom/Duix-Avatar) repository. A paid service covers only the explicitly agreed installation, adaptation, or authorized package delivery; it does not replace or expand any third-party license.

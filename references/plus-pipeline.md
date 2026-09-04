@@ -26,6 +26,15 @@ Phase 1 is accepted when IndexTTS2 plus `heygem-local` runs end to end on a docu
 - For `heygem-api`: a HeyGem-compatible API running locally.
 - For `dh-live`: a pinned DH_live checkout, its isolated Python, and `<avatars-root>/<avatar-code>/assets/{01.mp4,combined_data.json.gz}`.
 
+## Obtaining the digital-human runtime
+
+The repository intentionally excludes HeyGem/Duix model weights, Docker images, native extensions, and bundled environments because they are large and independently licensed.
+
+- **Maintainer-assisted path:** contact the Easegen maintainers through this repository's Issues for paid deployment, environment setup, low-VRAM adaptation, or an independently delivered runtime package where redistribution is authorized. Payment covers the stated integration/support service; it does not by itself grant rights to third-party code, models, images, voices, or commercial use.
+- **Self-managed path:** clone the current official project at [duixcom/Duix-Avatar](https://github.com/duixcom/Duix-Avatar), follow its deployment and license documentation, and adapt it locally. For API integration, add a loopback-only compatibility layer that maps the official `/easy/submit` and `/easy/query` endpoints to the `/api/v1/easedh/task/create` and `/api/v1/easedh/task/result` contract expected by `heygem-api`. For direct integration, adapt the inference entrypoint to emit the `EASEGEN_RESULT_JSON` contract required by `heygem-local`. The official checkout does not directly match either Easegen contract or the standalone engine directory layout.
+
+Never download or redistribute a community bundle solely because a public link exists. Preserve upstream notices and verify the current license for every code, model, image, and native-binary component.
+
 ## Project layout
 
 `init` writes the manifest. `run` preserves diagnostics and writes deterministic artifacts:
