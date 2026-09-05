@@ -30,9 +30,10 @@ def test_parse_runtime_result_rejects_unstructured_success_text():
         bridge.parse_runtime_result("finished successfully")
 
 
-def test_build_check_command_never_requires_media(tmp_path: Path):
+def test_build_check_command_never_requires_media_on_linux(tmp_path: Path, monkeypatch):
     engine = tmp_path / "engine"
     engine.mkdir()
+    monkeypatch.setattr(bridge, "is_windows", lambda: False)
     args = argparse.Namespace(
         engine_root=str(engine), audio="", avatar="", output="", gpu=2,
         timeout=60, warmup_seconds=30, check=True, dry_run=False,
@@ -42,3 +43,16 @@ def test_build_check_command_never_requires_media(tmp_path: Path):
 
     assert "--check" in command
     assert command[-4:] == ["--gpu", "2", "--warmup-seconds", "0"]
+
+
+def test_windows_requires_native_onnx_backend(tmp_path: Path, monkeypatch):
+    engine = tmp_path / "engine"
+    engine.mkdir()
+    monkeypatch.setattr(bridge, "is_windows", lambda: True)
+    args = argparse.Namespace(
+        engine_root=str(engine), audio="", avatar="", output="", gpu=0,
+        timeout=60, warmup_seconds=0, chunk_seconds=0, check=True, dry_run=False,
+    )
+
+    with pytest.raises(bridge.BridgeError, match="heygem-win-onnx"):
+        bridge.build_command(args)

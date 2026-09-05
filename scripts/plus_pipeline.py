@@ -9,6 +9,7 @@ from functools import partial
 import hashlib
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -47,7 +48,10 @@ def sha256(path: Path) -> str:
 
 
 def run(command: list[str], *, cwd: Path, timeout: int) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(command, cwd=cwd, text=True, capture_output=True, timeout=timeout)
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    result = subprocess.run(command, cwd=cwd, encoding="utf-8", errors="replace",
+                            env=env, capture_output=True, timeout=timeout)
     if result.returncode:
         detail = (result.stderr or result.stdout).strip()
         raise PipelineError(detail or f"command exited with {result.returncode}: {command[0]}")
@@ -187,12 +191,17 @@ def init_project(args: argparse.Namespace) -> dict[str, Any]:
         },
         "digitalHuman": {
             "backend": args.dh_backend,
-            "requiredDevice": "cuda" if args.dh_backend in {"heygem-api", "heygem-local"} else "cpu",
+            "requiredDevice": "cuda" if args.dh_backend in {"heygem-api", "heygem-local", "heygem-win-onnx"} else "cpu",
             "apiBase": args.dh_api_base.rstrip("/"),
             "timeoutSeconds": args.dh_timeout,
             "engineRoot": str(Path(args.dh_engine_root).resolve()) if args.dh_engine_root else "",
             "gpuIndex": args.dh_gpu,
             "warmupSeconds": args.dh_warmup_seconds,
+            "runtimePython": str(Path(args.dh_win_python).resolve()) if args.dh_win_python else "",
+            "batchSize": args.dh_batch_size,
+            "startupTimeoutSeconds": args.dh_startup_timeout,
+            "faceId": args.dh_face_id,
+            "faceEnhancement": args.dh_face_enhancement,
             "avatarCode": args.dh_avatar_code,
             "dhLiveRoot": str(Path(args.dh_live_root).resolve()) if args.dh_live_root else "",
             "dhLivePython": str(Path(args.dh_live_python).resolve()) if args.dh_live_python else "",
@@ -249,6 +258,21 @@ def command_plan(project: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             "--output", str(project / "presenter" / "host.mp4"),
             "--gpu", str(dh["gpuIndex"]), "--timeout", str(dh["timeoutSeconds"]),
             "--warmup-seconds", str(dh["warmupSeconds"])]
+    elif dh["backend"] == "heygem-win-onnx":
+        engine_root = dh.get("engineRoot") or dh.get("runtimeRoot", "")
+        digital_human_command = [manifest["tools"]["easegenPython"],
+            str(Path(__file__).with_name("heygem_win_onnx_bridge.py")),
+            "--runtime-root", engine_root, "--audio", str(audio),
+            "--avatar", str(project / "input" / "avatar.mp4"),
+            "--output", str(project / "presenter" / "host.mp4"),
+            "--gpu", str(dh["gpuIndex"]), "--batch-size", str(dh.get("batchSize", 1)),
+            "--startup-timeout", str(dh.get("startupTimeoutSeconds", 120)),
+            "--face-id", str(dh.get("faceId", 0)),
+            "--timeout", str(dh["timeoutSeconds"]), "--overwrite"]
+        if dh.get("runtimePython"):
+            digital_human_command += ["--runtime-python", dh["runtimePython"]]
+        if dh.get("faceEnhancement"):
+            digital_human_command.append("--face-enhancement")
     else:
         digital_human_command = [manifest["tools"]["easegenPython"],
             str(Path(__file__).with_name("dh_live_bridge.py")),
@@ -300,6 +324,10 @@ def preflight(project: Path, manifest: dict[str, Any], offline: bool) -> dict[st
         required = all(tts.get(key) not in (None, "") for key in ("userId", "modelCode", "voiceType"))
         checks.append({"name": "Easegen TTS identity", "ok": required})
     dh = manifest["digitalHuman"]
+    bridge_python_ok = Path(manifest["tools"]["easegenPython"]).is_file()
+    if dh["backend"] in {"heygem-local", "heygem-win-onnx", "dh-live"}:
+        checks.append({"name": "digital-human bridge Python", "ok": bridge_python_ok,
+                       "path": manifest["tools"]["easegenPython"]})
     if dh["backend"] == "heygem-api":
         checks.append({"name": "HeyGem execution device", "ok": dh.get("requiredDevice") == "cuda",
                        "detail": "local open-source HeyGem requires an NVIDIA GPU"})
@@ -313,11 +341,9 @@ def preflight(project: Path, manifest: dict[str, Any], offline: bool) -> dict[st
         checks.append({"name": "HeyGem external engine", "ok": bool(engine_value) and engine_root.is_dir(),
                        "path": str(engine_root)})
         checks.append({"name": "Skill standalone launcher", "ok": launcher.is_file(), "path": str(launcher)})
-        checks.append({"name": "HeyGem local OS", "ok": platform.system() in {"Windows", "Linux"},
-                       "detail": "Windows uses WSL; Linux runs the isolated Python 3.8 runtime directly"})
-        if platform.system() == "Windows":
-            checks.append({"name": "WSL", "ok": shutil.which("wsl") is not None})
-        if not offline and launcher.is_file() and engine_root.is_dir():
+        checks.append({"name": "HeyGem local OS", "ok": platform.system() == "Linux",
+                       "detail": "use heygem-win-onnx for native Windows; WSL is not used"})
+        if not offline and platform.system() == "Linux" and bridge_python_ok and launcher.is_file() and engine_root.is_dir():
             check_command = [manifest["tools"]["easegenPython"],
                              str(Path(__file__).with_name("heygem_local_bridge.py")),
                              "--engine-root", str(engine_root), "--gpu", str(dh.get("gpuIndex", 0)), "--check"]
@@ -325,8 +351,36 @@ def preflight(project: Path, manifest: dict[str, Any], offline: bool) -> dict[st
                 response = parse_json_stdout(run(check_command, cwd=project, timeout=180), "HeyGem local check")
                 checks.append({"name": "HeyGem local native check", "ok": response.get("success") is True,
                                "detail": response})
-            except (PipelineError, subprocess.TimeoutExpired) as exc:
+            except (PipelineError, OSError, subprocess.TimeoutExpired) as exc:
                 checks.append({"name": "HeyGem local native check", "ok": False, "detail": str(exc)})
+    elif dh["backend"] == "heygem-win-onnx":
+        engine_value = dh.get("engineRoot") or dh.get("runtimeRoot", "")
+        engine_root = Path(engine_value or "")
+        runtime_python = Path(dh.get("runtimePython") or engine_root / "py39" / "python.exe")
+        bridge = Path(__file__).with_name("heygem_win_onnx_bridge.py")
+        runner = Path(__file__).with_name("heygem_win_onnx_runner.py")
+        checks.append({"name": "HeyGem Windows ONNX OS", "ok": platform.system() == "Windows",
+                       "detail": "native Windows subprocess; WSL is not used"})
+        checks.append({"name": "HeyGem Windows ONNX runtime", "ok": bool(engine_value) and engine_root.is_dir(),
+                       "path": str(engine_root)})
+        checks.append({"name": "HeyGem bundled Python 3.10", "ok": runtime_python.is_file(),
+                       "path": str(runtime_python)})
+        checks.append({"name": "HeyGem Windows ONNX bridge", "ok": bridge.is_file() and runner.is_file(),
+                       "path": str(bridge)})
+        if not offline and platform.system() == "Windows" and bridge_python_ok and bridge.is_file() and runner.is_file() and engine_root.is_dir() and runtime_python.is_file():
+            check_command = [manifest["tools"]["easegenPython"], str(bridge),
+                             "--runtime-root", str(engine_root), "--runtime-python", str(runtime_python),
+                             "--gpu", str(dh.get("gpuIndex", 0)), "--batch-size", str(dh.get("batchSize", 1)),
+                             "--check", "--timeout", "180"]
+            try:
+                response = parse_json_stdout(run(check_command, cwd=project, timeout=210), "HeyGem Windows ONNX check")
+                runtime = response.get("runtime", {})
+                checks.append({"name": "HeyGem ONNX provider capability (not inference)",
+                               "ok": response.get("success") is True and
+                                     "CUDAExecutionProvider" in runtime.get("providers", []),
+                               "detail": response})
+            except (PipelineError, OSError, subprocess.TimeoutExpired) as exc:
+                checks.append({"name": "HeyGem ONNX provider capability (not inference)", "ok": False, "detail": str(exc)})
     elif dh["backend"] == "dh-live":
         checks.append({"name": "DH_live offline synthesis OS", "ok": platform.system() == "Windows",
                        "detail": "the audited upstream offline MP4 path currently supports Windows"})
@@ -428,7 +482,7 @@ def generate_presenter(project: Path, manifest: dict[str, Any], paths: dict[str,
         terminal = response.get("data", {}).get("result", {})
         if response.get("success") is not True or terminal.get("status") != 3:
             raise PipelineError(f"HeyGem did not reach terminal status 3: {response}")
-    elif dh["backend"] in {"heygem-local", "dh-live"}:
+    elif dh["backend"] in {"heygem-local", "heygem-win-onnx", "dh-live"}:
         command = command_plan(project, manifest)["digitalHumanCommand"]
         response = parse_json_stdout(
             run([str(item) for item in command], cwd=project, timeout=int(dh["timeoutSeconds"]) + 120),
@@ -436,16 +490,18 @@ def generate_presenter(project: Path, manifest: dict[str, Any], paths: dict[str,
         )
         if response.get("success") is not True:
             raise PipelineError(f"{dh['backend']} failed: {response}")
-        terminal = {"status": 3, "backend": dh["backend"], "output_file": response.get("output")}
+        terminal = {"status": 3, "backend": dh["backend"], "output_file": response.get("output"),
+                    "runtime": response.get("runtime"), "telemetry": response.get("telemetry")}
     else:
         raise PipelineError(f"unsupported digital-human backend: {dh['backend']}")
     result = probe(output)
     avatar = probe(paths["avatar"])
-    if not any(stream.get("codec_type") == "video" for stream in result["streams"]):
-        raise PipelineError(f"{dh['backend']} output has no video stream")
+    stream_types = {stream.get("codec_type") for stream in result["streams"]}
+    if not {"video", "audio"}.issubset(stream_types):
+        raise PipelineError(f"{dh['backend']} output must contain video and audio streams")
     if abs(result["duration"] - audio["duration"]) > 0.25:
         raise PipelineError(f"{dh['backend']} output duration differs from narration by more than 0.25 seconds")
-    if abs(result["duration"] - avatar["duration"]) <= 0.01 or result["sha256"] == avatar["sha256"]:
+    if result["sha256"] == avatar["sha256"]:
         raise PipelineError(f"{dh['backend']} output is indistinguishable from the avatar template")
     face_zone = output.with_name("face-zone.json")
     run([sys.executable, str(Path(__file__).with_name("face_bbox.py")), str(output), str(face_zone)],
@@ -510,12 +566,22 @@ def parser() -> argparse.ArgumentParser:
     init.add_argument("--alignment-model-dir", default="")
     init.add_argument("--skip-alignment", action="store_true")
     init.add_argument("--dh-api-base", default="http://127.0.0.1:17863")
-    init.add_argument("--dh-backend", choices=("heygem-local", "heygem-api", "dh-live"), default="heygem-local")
+    init.add_argument("--dh-backend", choices=("heygem-win-onnx", "heygem-local", "heygem-api", "dh-live"),
+                      default="heygem-win-onnx" if platform.system() == "Windows" else "heygem-local")
     init.add_argument("--dh-timeout", type=int, default=1800)
     init.add_argument("--dh-engine-root", "--dh-runtime-root", dest="dh_engine_root", default="",
                       help="External easegen-digitalhuman-v2 engine/model directory; legacy name remains an alias")
     init.add_argument("--dh-gpu", type=int, default=0)
     init.add_argument("--dh-warmup-seconds", type=float, default=30)
+    init.add_argument("--dh-win-python", default="",
+                      help="Optional Python override; defaults to ENGINE_ROOT/py39/python.exe")
+    init.add_argument("--dh-batch-size", type=int, choices=(1, 2, 4), default=1,
+                      help="Windows ONNX inference batch; 1 minimizes peak VRAM")
+    init.add_argument("--dh-startup-timeout", type=float, default=120,
+                      help="Windows ONNX worker readiness deadline in seconds")
+    init.add_argument("--dh-face-id", type=int, default=0)
+    init.add_argument("--dh-face-enhancement", action="store_true",
+                      help="Enable GFPGAN; disabled by default to reduce peak VRAM")
     init.add_argument("--dh-avatar-code", default="")
     init.add_argument("--dh-live-root", default="")
     init.add_argument("--dh-live-python", default="")

@@ -16,6 +16,8 @@ demos/_lib/sfx/picked/
 # 依赖
 node_modules/
 .local/
+.heygem-jobs/
+*.pyd
 
 # Optional local model/runtime material never belongs in this repository
 models/

@@ -49,7 +49,7 @@ If this project helps you, please also follow and support the upstream author:
 ## ✨ Easegen Plus additions
 
 - Local IndexTTS2 narration on CPU/CUDA and other devices supported upstream.
-- `heygem-local` as the recommended Phase 1 GPU backend, HeyGem API compatibility,
+- Native Windows `heygem-win-onnx` (no WSL), Linux `heygem-local`, HeyGem API compatibility,
   and an experimental DH_live CPU path.
 - A standalone adapter that keeps model runtimes isolated from Easegen's production
   Redis, API, object-storage, and scheduler code.
@@ -57,6 +57,8 @@ If this project helps you, please also follow and support the upstream author:
   face-safe zones, and the TalkCraft handoff.
 
 See [the Plus pipeline reference](references/plus-pipeline.md) for setup and honest hardware boundaries.
+The [native Windows guide](references/windows-onnx.md) documents batch-1 defaults,
+threaded workers, isolated outputs, measured VRAM and limitations; CUDA is still required.
 
 ## 🧩 Obtaining a HeyGem / avatar runtime
 
@@ -147,17 +149,17 @@ In both cases, review the current HeyGem/Duix code, model, Docker-image, redistr
 In Claude Code / Codex or a similar agent, just say:
 
 ```text
-Install this skill for me: https://github.com/taoofagi/easegen-video-talkcraft
+Install this skill for me: https://github.com/haojing8312/easegen-video-talkcraft
 ```
 
 Or install with the [skills](https://skills.sh/) CLI / manually:
 
 ```bash
-npx skills add taoofagi/easegen-video-talkcraft
+npx skills add haojing8312/easegen-video-talkcraft
 ```
 
 ```bash
-git clone https://github.com/taoofagi/easegen-video-talkcraft.git
+git clone https://github.com/haojing8312/easegen-video-talkcraft.git
 cd easegen-video-talkcraft
 ln -s "$(pwd)" ~/.claude/skills/easegen-video-talkcraft   # Claude Code
 # or

@@ -27,8 +27,11 @@ description: 本地优先的数字人口播视频 Skill：既可接收成品配�
 
 - 所有推理在用户自己的电脑上运行，不接入远程 GPU 租赁或自动云端回退。
 - IndexTTS2 可选择 CPU、CUDA 等上游支持的设备；CPU 是兼容路径，不承诺实时速度。
-- `heygem-local` 是第一阶段推荐后端：Skill 内置独立适配层，外部 `easegen-digitalhuman-v2`
-  仅提供权重、原生扩展和隔离环境；不得修改其生产 Redis、API、对象存储或调度代码。
+- Windows 使用 `heygem-win-onnx`：外部 Windows ONNX 整合包 + 自带 Python 3.10，
+  不使用 WSL；默认 batch=1、关闭人脸增强、线程化工作器和有界流式读帧。
+  先读 `references/windows-onnx.md`；`--check` 只是文件/Provider 可用性检查，不代表推理成功。
+- Linux 保留 `heygem-local` 独立适配层；不得修改生产版 `easegen-digitalhuman-v2`
+  的 Redis、API、对象存储或调度代码。Windows 新任务写入自己的隔离目录，不修改外部引擎源码或配置。
 - `heygem-api` 兼容已有的本地 HeyGem 服务；`dh-live` 是实验性 CPU 后端。
 - HeyGem 运行时可由用户自行从 `https://github.com/duixcom/Duix-Avatar` 拉取并按官方许可改造，
   也可联系 Easegen 维护者获取付费部署/适配支持；付费服务不得被描述成自动包含第三方模型或商业授权。
@@ -321,7 +324,7 @@ X [`@VincentWei93`](https://x.com/VincentWei93) ·
 | 选动效/查参数和坑 | `references/taxonomy.md` → `references/cards/` → `template/cards/`（tsx 源码）+ `demos/`/`gallery/`（预览） |
 | 找素材 | `references/broll-sources.md` |
 | 人物素材（输入规格 / CPU 抠像 / 人脸安全区）· 与 B-roll 同屏怎么摆 | `references/host-footage.md` + `scripts/face_bbox.py` |
-| 从文稿生成配音与数字人 | `references/plus-pipeline.md` → `scripts/plus_pipeline.py`；IndexTTS2 CPU/CUDA + `heygem-local` / HeyGem API GPU + 实验性 DH_live CPU |
+| 从文稿生成配音与数字人 | `references/plus-pipeline.md` → `scripts/plus_pipeline.py`；Windows 原生 `heygem-win-onnx` 见 `references/windows-onnx.md`，Linux `heygem-local` / HeyGem API GPU + 实验性 DH_live CPU |
 | 新增配方卡 | `references/demo-spec.md`，验证 `node scripts/verify-demo.mjs <slug>` |
 | 可复制代码 | `template/cards/`（79 卡逐卡自包含 tsx）、`template/motion-systems/`（相机/让位/环境/桥）、`template/components/`（字幕/花字/铅笔/吉祥物） |
 | 成片后人工微调 / 导出 | `workbench/`（剪映式工作台：多轨时间线 + 全卡参数化 + 成片拆解 + Remotion 渲染导出） |

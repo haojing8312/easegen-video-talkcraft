@@ -41,7 +41,8 @@ Remotion 工程模板、动效工作台和机器验收方法。Easegen Plus 的 
 ## ✨ Easegen Plus 新增能力
 
 - **IndexTTS2 本地配音**：支持 CPU/CUDA 等上游设备；CPU 可运行但不承诺实时速度。
-- **本地数字人后端**：推荐 `heygem-local` GPU 路径，兼容 HeyGem API，并提供实验性 DH_live CPU 路径。
+- **本地数字人后端**：Windows 原生 `heygem-win-onnx`，不使用 WSL；Linux 使用 `heygem-local`。兼容 HeyGem API，保留实验性 DH_live CPU 路径。
+- **Windows 低显存适配**：batch=1、可关闭人脸增强、单进程线程工作器、有界流式读帧、任务目录隔离与超时进程树回收。仍需 NVIDIA GPU，详见 [原生运行与实测说明](references/windows-onnx.md)。
 - **独立运行边界**：Skill 自带 standalone 适配层，模型与生产版 `easegen-digitalhuman-v2` 保持隔离。
 - **可复现交付**：固定输出配音、数字人、时间戳、人物安全区、运行状态和 TalkCraft 输入清单。
 
@@ -120,17 +121,17 @@ HeyGem 运行时和模型体积较大，因此不会直接提交到本仓库。�
 在 Claude Code / Codex 里直接说：
 
 ```text
-帮我安装这个 skill：https://github.com/taoofagi/easegen-video-talkcraft
+帮我安装这个 skill：https://github.com/haojing8312/easegen-video-talkcraft
 ```
 
 或用 [skills](https://skills.sh/) CLI / 手动安装：
 
 ```bash
-npx skills add taoofagi/easegen-video-talkcraft
+npx skills add haojing8312/easegen-video-talkcraft
 ```
 
 ```bash
-git clone https://github.com/taoofagi/easegen-video-talkcraft.git
+git clone https://github.com/haojing8312/easegen-video-talkcraft.git
 cd easegen-video-talkcraft
 ln -s "$(pwd)" ~/.claude/skills/easegen-video-talkcraft   # Claude Code
 # 或

@@ -7,7 +7,6 @@ import argparse
 import json
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 from typing import Any
@@ -21,12 +20,8 @@ class BridgeError(RuntimeError):
     pass
 
 
-def windows_to_wsl(path: Path) -> str:
-    drive = path.drive.rstrip(":").lower()
-    if len(drive) != 1 or not drive.isalpha():
-        raise BridgeError(f"cannot convert path to WSL: {path}")
-    relative = path.as_posix().split(":", 1)[1].lstrip("/")
-    return f"/mnt/{drive}/{relative}"
+def is_windows() -> bool:
+    return os.name == "nt"
 
 
 def require_path(value: str, label: str, *, directory: bool = False) -> Path:
@@ -43,14 +38,10 @@ def build_command(args: argparse.Namespace) -> list[str]:
     if not launcher.is_file():
         raise BridgeError(f"Skill standalone launcher does not exist: {launcher}")
 
-    on_windows = os.name == "nt"
-    if on_windows:
-        command = ["wsl", "--cd", windows_to_wsl(engine), "bash", windows_to_wsl(launcher),
-                   "--engine-root", windows_to_wsl(engine)]
-        convert = windows_to_wsl
-    else:
-        command = ["bash", str(launcher), "--engine-root", str(engine)]
-        convert = lambda path: str(path)
+    if is_windows():
+        raise BridgeError("heygem-local is Linux-only; use heygem-win-onnx on Windows (WSL is not used)")
+    command = ["bash", str(launcher), "--engine-root", str(engine)]
+    convert = lambda path: str(path)
 
     if args.check:
         return command + ["--check", "--gpu", str(args.gpu), "--warmup-seconds", "0"]
@@ -112,8 +103,6 @@ def parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = parser().parse_args()
     try:
-        if os.name == "nt" and shutil.which("wsl") is None:
-            raise BridgeError("wsl.exe is required on Windows")
         command = build_command(args)
         if args.dry_run:
             print(json.dumps({"success": True, "command": command}, ensure_ascii=False))
