@@ -60,6 +60,27 @@ See [the Plus pipeline reference](references/plus-pipeline.md) for setup and hon
 The [native Windows guide](references/windows-onnx.md) documents batch-1 defaults,
 threaded workers, isolated outputs, measured VRAM and limitations; CUDA is still required.
 
+## 🖥️ VRAM requirements: can a 4 GB GPU run it?
+
+**The verified GPU is an NVIDIA RTX 2070 with 8 GB VRAM. The minimum VRAM requirement is not yet established; 4 GB and 6 GB cards have not been tested on real hardware.**
+This does not mean the model necessarily needs 8 GB, nor does it justify a claim that 4 GB is sufficient. The following applies only to the native Windows `heygem-win-onnx` avatar backend:
+
+| GPU configuration | Verification status |
+| --- | --- |
+| NVIDIA RTX 2070 8 GB | Short-clip synthesis and audiovisual acceptance passed. Other GPU models still require runtime compatibility checks. |
+| NVIDIA 4 GB / 6 GB | Low-VRAM validation targets, not confirmed supported configurations. Experimental attempts may fail. |
+| No NVIDIA CUDA GPU / CPU-only | Not supported by this HeyGem backend; CPU-only avatar generation remains future research. |
+
+With **batch 1, GFPGAN enhancement off, FP32, 480×832 at 30 fps and about 2.05 seconds of narration**,
+sampled whole-GPU peak usage was **2941–2948 MiB (about 2.88 GiB)**, including desktop and other applications.
+Observing roughly 3 GB usage on an 8 GB card is not a successful 4 GB hardware test. GPU model, driver,
+resolution, enhancement settings and competing applications can affect the result.
+
+For a low-VRAM experiment, use `--dh-batch-size 1`, leave `--dh-face-enhancement` disabled, run one job at a time,
+and validate a short clip first. IndexTTS2 can use `--tts-device cpu`, at the cost of speed. These measurements
+cover **only the avatar stage**, not the minimum requirements of the complete IndexTTS2 + avatar + Remotion
+pipeline, long-form video, or 1080p/4K output. See the [Windows guide](references/windows-onnx.md) for the full test record.
+
 ## 🧩 Obtaining a HeyGem / avatar runtime
 
 The HeyGem runtime and model files are too large to commit to this repository. Choose one of these paths:
