@@ -68,6 +68,9 @@ def runtime_environment(runtime: Path, workspace: Path) -> dict[str, str]:
                 "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8",
                 "GRADIO_TEMP_DIR": str(workspace / "tmp"), "TEMP": str(workspace / "tmp"),
                 "TMP": str(workspace / "tmp"), "XFORMERS_FORCE_DISABLE_TRITON": "1"})
+    # PYTHONDONTWRITEBYTECODE does not suppress Numba's .nbi/.nbc JIT caches.
+    # Keep them with this job instead of modifying the bundled librosa directory.
+    env["NUMBA_CACHE_DIR"] = str(workspace / "tmp" / "numba-cache")
     # Do not set expandable_segments: that CUDA allocator feature is unsupported
     # by this bundle on Windows and does not constrain ONNX Runtime arenas.
     env.pop("PYTHONHOME", None)

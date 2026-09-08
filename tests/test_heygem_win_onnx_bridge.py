@@ -59,6 +59,15 @@ def test_build_check_command_uses_bundled_python_without_wsl(tmp_path: Path):
     assert command[command.index("--gpu") + 1] == "1"
 
 
+def test_numba_cache_stays_in_job_not_bundled_dependencies(tmp_path, monkeypatch):
+    runtime = _runtime(tmp_path)
+    workspace = tmp_path / "job"
+    monkeypatch.setenv("NUMBA_CACHE_DIR", "old-shared-cache")
+    env = bridge.runtime_environment(runtime, workspace)
+    assert env["NUMBA_CACHE_DIR"] == str(workspace / "tmp" / "numba-cache")
+    assert os.environ["NUMBA_CACHE_DIR"] == "old-shared-cache"
+
+
 def test_build_render_command_defaults_to_low_vram_profile(tmp_path: Path):
     args = _args(tmp_path)
 
