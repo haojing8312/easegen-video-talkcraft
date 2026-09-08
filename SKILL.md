@@ -22,6 +22,11 @@ description: 本地优先的数字人口播视频 Skill：既可接收成品配�
 
 ## Plus 流程：IndexTTS2 + 本地数字人
 
+首次安装、缺依赖或询问“素材放哪里/数字人怎么下载”时，先读
+[`references/beginner-windows.md`](references/beginner-windows.md)。按实际路径配置独立环境；
+IndexTTS2 使用官方 v2 CLI，不要求修改上游模型源码；独立数字人包的引擎路径是 `engine` 子目录。
+运行包没有私人示例音色或人物视频，缺少时要求用户提供授权素材，不从其他项目擅自挑选。
+
 当用户只有口播稿、授权音色参考和单人人物母片，希望 Skill 同时生成配音与人物口型时，读取
 [`references/plus-pipeline.md`](references/plus-pipeline.md)，使用 `scripts/plus_pipeline.py` 初始化、预检并运行。
 

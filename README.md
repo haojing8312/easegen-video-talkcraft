@@ -22,6 +22,8 @@ IndexTTS2 与本地数字人运行时，再用 [Remotion](https://www.remotion.d
 > 本仓库不包含模型权重、CUDA 环境、第三方原生二进制、私人音色或头像素材，也不接入远程 GPU 租赁。
 > 上游代码继续遵循 PolyForm Noncommercial 1.0.0，商业使用需取得原作者授权。
 
+第一次使用？先读 **[Windows 新手指南：下载组件 → 放入自己的素材 → 让 Codex / WorkBuddy 生成](references/beginner-windows.md)**。
+
 ![easegen-video-talkcraft：完全本地，从口播稿生成高质量数字人成片](assets/easegen-video-talkcraft-cover-v2.png)
 
 ## 🙏 特别致谢 video-talkcraft
@@ -85,6 +87,8 @@ HeyGem 运行时和模型体积较大，因此不会直接提交到本仓库。�
 
 无论选择哪种方式，都必须自行核对 HeyGem/Duix 的代码、模型、Docker 镜像与商业使用条款。
 
+维护者的清理、构建、验收及网盘发布步骤见 [数字人运行包分发说明](references/runtime-distribution.md)。
+
 <p align="center">
   <img src="assets/easegen-author-wechat.png" alt="Easegen 作者微信二维码" width="280">
   <br>
@@ -136,6 +140,22 @@ HeyGem 运行时和模型体积较大，因此不会直接提交到本仓库。�
   纯音效轨逐 cue 能量验证、带动效锚点帧与评审拼图的独立评审。
 
 ## 🚀 快速开始
+
+**第一次使用、只有口播稿的用户，先看 [Windows 零基础安装与素材指南](references/beginner-windows.md)。**
+安装 Skill 不会自动获得数字人引擎与配音模型。Codex / WorkBuddy 可以按指南配置；
+没有自动识别 Skill 时，请让它直接读取本仓库 `SKILL.md` 和该指南。
+
+| 你需要准备 | 从哪里获得 / 放哪里 |
+| --- | --- |
+| IndexTTS2 配音 | [官方仓库](https://github.com/index-tts/index-tts)，无需 Easegen 定制版；选 **IndexTTS-2**，独立环境安装，[下载命令](references/beginner-windows.md#4-安装官方-indextts2) |
+| 数字人运行包 | 联系 **Easegen 维护者**，扫码上方“Easegen 作者微信”，备注“easegen 数字人运行包”；或[本仓库 Issues](https://github.com/haojing8312/easegen-video-talkcraft/issues)。独立交付，可通过百度网盘获取；公开链接尚未配置 |
+| 自己的素材 | 项目 `source/script.txt`、`source/voice-reference.wav`、`source/avatar.mp4`；声音建议 5—15 秒干净授权录音，人物是单人、嘴部清晰、无切镜的授权视频，[详细要求](references/beginner-windows.md#三个文件分别是什么) |
+| 字幕与成片工具 | FFmpeg/FFprobe（数字人包提供）、独立 Python 工具环境、对齐模型、Node.js 和 Remotion，[安装与调用](references/beginner-windows.md#6-安装工具环境并串起-plus) |
+
+数字人包接收“**完整配音 + 人物视频**”，不是参考音色或照片。
+运行包解压后 `--dh-engine-root` 指向 **`engine` 子目录**。
+默认 batch=1、关闭增强；RTX 2070 8GB 已做短片测试，4GB/6GB 未验证。
+Plus 生成 `talkcraft-input.json` 后，仍需 Agent 完成字幕动效和 Remotion 渲染，才是最终成片。
 
 **最直接的方式：把仓库链接丢给你的 agent。**
 在 Claude Code / Codex 里直接说：

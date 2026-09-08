@@ -15,6 +15,7 @@ demos/_lib/sfx/picked/
 
 # 依赖
 node_modules/
+.venv-tools/
 .local/
 .heygem-jobs/
 *.pyd

@@ -2,6 +2,10 @@
 
 Use this reference when the user wants the Skill to create narration and presenter footage instead of supplying finished media.
 
+For first-time Windows installation, component download links, authorized input requirements,
+folder layout and Codex/WorkBuddy prompts, read [the beginner guide](beginner-windows.md).
+For the separately distributed Easegen Windows package, `--dh-engine-root` points to its `engine` subdirectory.
+
 ## Product boundary
 
 All generation runs on the user's own computer. Do not add remote GPU rental, hosted inference, or an automatic cloud fallback. Model environments and weights stay outside the Skill directory so their Python, PyTorch, CUDA, and ONNX dependencies do not corrupt each other. The Skill stores no weights or secrets.

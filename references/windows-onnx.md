@@ -5,6 +5,10 @@ This backend does not use WSL, Docker, Redis, object storage, remote GPU rental,
 or the production `easegen-digitalhuman-v2` service. It still requires NVIDIA CUDA.
 The bridge is not a universal adapter for every HeyGem/Duix distribution.
 
+Numba JIT caches are redirected to each job's `tmp/numba-cache` directory;
+`PYTHONDONTWRITEBYTECODE` alone does not stop librosa/Numba from writing `.nbi/.nbc`
+into the bundled Python environment. This keeps a tested distribution clean.
+
 ## Prerequisites
 
 - Windows x64, NVIDIA driver and the bundle's compatible CUDA dependencies.

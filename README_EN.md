@@ -166,6 +166,14 @@ In both cases, review the current HeyGem/Duix code, model, Docker-image, redistr
 
 ## 🚀 Quick start
 
+First-time Windows users: follow the [step-by-step setup and media guide (Chinese)](references/beginner-windows.md).
+It covers Codex/WorkBuddy prompts, official IndexTTS-2 installation (no custom model changes required),
+obtaining the separate avatar runtime from the **Easegen maintainer**, authorized voice/video inputs,
+folder layout, exact commands, and the distinction between Plus handoff and final Remotion output.
+The compatible packaged runtime's `--dh-engine-root` is its **`engine` subdirectory**.
+No public Baidu Netdisk URL is configured yet; contact the maintainer through this repository's Issues
+or the Easegen author QR code, not the upstream video-talkcraft author.
+
 **The most direct way: hand the repo link to your agent.**
 In Claude Code / Codex or a similar agent, just say:
 
