@@ -14,6 +14,8 @@ name: callout-line-label
 口播说"真正值钱的是这两处"时，观众的眼睛需要被牵到画面的具体位置——callout 把"用手指"翻译成三拍因果：点亮起（在哪）→ 线生长（往哪看）→ 标签揭示（是什么）。
 命门：**三拍必须严格串行**（同时出现就没有引导视线的因果感）；**折线拐点只用 45° 或水平**（工程制图的秩序感，斜率随意像草图）；**标签永远最后出现**（答案不能比手指先到）。
 
+常见于：Johnny Harris、Vox、AE 模板 Call-Out Titles（4.5K 销量）、产品评测。
+
 ## 动效核心
 - 圆点：SVG circle 落在目标上，scale 0→1，0.2s `back.out(2.2)`；同时一圈同色描边涟漪 scale 0.4→3.2、opacity 0.9→0，0.5s `power2.out`
 - 折线：SVG path（1~2 个拐点，全部 45° 或水平），`stroke-dasharray` = 总长，`stroke-dashoffset` 从总长→0 描画 0.4s `power2.out`；**起点排在圆点 pop 结束之后**（t0 + dotIn）
@@ -52,3 +54,8 @@ name: callout-line-label
 - 不属于本卡的：被标注的产品图占位（demo 里那部灰阶线框手机）、标签的排版/边框/字号、示例文案与坐标、字幕行。
 - 迁移接口：`CONFIG.color` 一处换标注色（点/涟漪/线同色，需与底图高对比）；`CONFIG.callouts[]` 换 `target`（圆点坐标）/ `points`（拐点+终点，保持 45°/水平）/ `label.x,y` 与 `label.from`（展开方向）；时长四件套 `dotIn / lineDraw / labelIn / hold` 按语速整体乘同一系数缩放；`dotR`、`stroke-width` 随输出分辨率等比缩放。
 - 底色要求：白底即可。标注色只需与底图有足够对比——深底把 `CONFIG.color` 换成高亮黄、标签底色改深色即可，动效时序不变。
+
+## 落位自检（2026-09-05 用户定版，选卡时抄进 SHOTBOOK 该镜自检列）
+- 标注几何（框 / 圈 / 线 / 箭头 / 放大镜锚点）一律由**目标的实测包围盒**反推——DOM `getBoundingClientRect` / `measureText`，四边留白 16~24px 等距，**不目测**。
+- 实现后抽该镜定妆帧核对：标注是否恰好套住 / 指向目标，偏差 **> 8px 返工**（`references/layout.md` §3）。
+- 目标会滚动 / 移动时，标注钉在内容坐标系随内容动（SKILL.md ③）。

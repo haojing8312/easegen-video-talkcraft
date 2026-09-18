@@ -7,7 +7,7 @@
 ## 1. 电脑要求
 
 - Windows x64 + NVIDIA CUDA 显卡及兼容驱动，不使用 WSL、Docker、Redis、对象存储。
-- 已实测 RTX 2070 8GB 的短片数字人合成；4GB/6GB 未验证，AMD/Intel 核显、纯 CPU 暂不支持该后端。
+- 已实测 RTX 2070 8GB 的短片数字人合成；4GB 有显存不足反馈、6GB 未验收，AMD/Intel 核显及纯 CPU 暂不支持该后端。
 - IndexTTS2 可单独选择 CPU（慢）或兼容的 CUDA，不代表 HeyGem 也能用 CPU。
 - 下载包、解压目录、TTS 权重、每次任务中间文件分别占空间；压缩大小不等于运行所需磁盘空间。
 - 先试 3—5 秒口播，不要第一次就提交几分钟长稿。最终 1080P 画布不等于人物源视频必须 1080P。
@@ -144,7 +144,13 @@ npm --version
 ```
 
 PATH 只在当前 PowerShell 生效；新终端重新设置，或让 Agent 每次调用时设置。
-**不要给数字人 Python 安装/升级这些工具依赖。** Remotion 依赖和浏览器由 Agent 在单片工程内配置，仓库根目录的 `npm install` 不是完整成片工程安装。
+**不要给数字人 Python 安装/升级这些工具依赖。** Remotion 依赖和浏览器统一安装在 Skill 的 `runtime/`，不要在仓库根目录或单片工程执行 `npm install`。首次使用及每支新片开工，让 Agent 在 Skill 根目录运行：
+
+```powershell
+node runtime/windows-runtime.mjs check --upgrade
+```
+
+它会检查共享依赖、无头浏览器和工作台；不使用 WSL。单片 Remotion 工程建好后运行 `node runtime/windows-runtime.mjs link D:\Easegen\projects\my-first-video`，让其 `node_modules` 指向共享依赖。已有独立 `node_modules` 时脚本会拒绝覆盖，先让 Agent 核对再迁移。
 从 Skill 根目录初始化并运行（同一 PowerShell）：
 
 ```powershell

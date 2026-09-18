@@ -26,6 +26,11 @@ window.SFX_MAP = {
     {"t": 0.98, "name": "pk:mech-lock-quick", "vol": 0.48, "rate": 1.4},
     {"t": 1.26, "name": "pk:ui-pop", "vol": 0.55, "clip": 0.2},
   ],
+  "bed-echo-blur": [
+    {"t": 0.0, "name": "pk:transition-air-whoosh-powerful", "vol": 0.22, "clip": 1.2, "note": "底床起（空气底噪）"},
+    {"t": 0.3, "name": "pk:paper-paper-slide", "vol": 0.4, "clip": 0.6, "note": "前景竖卡落位"},
+    {"t": 0.8, "name": "pk:ui-ui-click-tone", "vol": 0.3, "note": "标题第一行升入"},
+  ],
   "behind-text-title": [
     {"t": 0.4, "name": "pk:impact-impact-deep-whoosh", "vol": 0.6, "dur": 0.55, "clip": 0.9},
   ],
@@ -98,12 +103,25 @@ window.SFX_MAP = {
     {"t": 5.18, "name": "pk:ui-pop", "vol": 0.38, "rate": 0.94, "note": "红框停定"},
     {"t": 6.68, "name": "pk:paper-paper-slide", "vol": 0.34, "rate": 1.08, "clip": 0.9, "note": "再起滚"},
   ],
+  "filmstrip-conveyor": [
+    /* 传送带匀速不配声（持续运动不是命门）；只跟减速停靠 / 重新加速两处拍；标题入场一记极轻 */
+    {"t": 0.05, "name": "pk:ui-pop", "vol": 0.3, "note": "标题在场"},
+    {"t": 2.14, "name": "pk:counter-clock-tick-single", "vol": 0.4, "rate": 0.95, "clip": 1.0, "note": "减速起点（第四格将居中）"},
+    {"t": 2.64, "name": "pk:mech-lock-quick", "vol": 0.36, "clip": 0.5, "note": "减速结束、第四格正对中线（慢速停靠开始）"},
+    {"t": 4.04, "name": "pk:transition-wind-swoosh-short", "vol": 0.3, "rate": 0.9, "clip": 0.6, "note": "重新加速回匀速"},
+  ],
   "focus-dim-spotlight": [
     {"t": 0.45, "name": "ping", "vol": 0.45, "note": "压暗+亮环"},
     {"t": 2, "name": "pk:ui-ui-click-tone", "vol": 0.3, "note": "焦点跳行2"},
     {"t": 3.2, "name": "pk:ui-ui-click-tone", "vol": 0.3, "rate": 1.06, "note": "跳行3"},
     {"t": 4.4, "name": "pk:ui-ui-click-tone", "vol": 0.3, "rate": 1.12, "note": "跳行4"},
     {"t": 5.6, "name": "pk:transition-air-whoosh-powerful", "vol": 0.34, "clip": 0.9, "note": "通道切换撑开"},
+  ],
+  "grid-to-hero": [
+    {"t": 0.3, "name": "pk:ui-pop", "vol": 0.4, "note": "四格错峰落位（一记盖住）"},
+    {"t": 2.41, "name": "pk:camera-ui-zoom-in", "vol": 0.4, "note": "重排：主图长大、其余收成一列"},
+    {"t": 3.21, "name": "pk:mech-lock-quick", "vol": 0.3, "note": "主图落定咬合"},
+    {"t": 5.21, "name": "pk:transition-wind-swoosh-short", "vol": 0.3, "note": "回到网格"},
   ],
   "hand-drawn-ellipse": [
     {"t": 0.42, "name": "pk:text-marker-pen-line", "vol": 0.45, "clip": 0.5, "note": "手绘圈画出"},
@@ -165,6 +183,20 @@ window.SFX_MAP = {
     {"t": 0.8, "name": "pk:transition-wind-swoosh-short", "vol": 0.3, "rate": 1.1, "clip": 0.5, "note": "卡B甩出"},
     {"t": 1, "name": "pk:impact-hit-fast-exciting", "vol": 0.45, "rate": 1.08, "clip": 0.9, "note": "卡B急停"},
   ],
+  "gallery-wall-dolly": [
+    /* 停靠类：每段相机起步一记停靠 tick（hold 段绝对不配）；拉回配一记压低的空气声 */
+    {"t": 0.8, "name": "pk:counter-clock-tick-single", "vol": 0.4, "rate": 1.05, "clip": 1.0, "note": "推到第一张"},
+    {"t": 2.7, "name": "pk:counter-clock-tick-single", "vol": 0.4, "clip": 1.0, "note": "推到第二张"},
+    {"t": 4.6, "name": "pk:counter-clock-tick-single", "vol": 0.4, "rate": 0.95, "clip": 1.0, "note": "推到第三张"},
+    {"t": 6.5, "name": "pk:transition-air-whoosh-powerful", "vol": 0.26, "rate": 0.9, "clip": 1.2, "note": "拉回全景"},
+  ],
+  "timeline-photo-strip": [
+    /* 停靠类：每次横移起步一记 tick（hold 段不配）；拉开看全条配一记压低的空气声 */
+    {"t": 1.4, "name": "pk:counter-clock-tick-single", "vol": 0.4, "rate": 1.05, "clip": 0.9, "note": "横移到第二站"},
+    {"t": 3.3, "name": "pk:counter-clock-tick-single", "vol": 0.4, "clip": 0.9, "note": "横移到第三站"},
+    {"t": 5.2, "name": "pk:counter-clock-tick-single", "vol": 0.4, "rate": 0.95, "clip": 0.9, "note": "横移到第四站"},
+    {"t": 7.1, "name": "pk:transition-air-whoosh-powerful", "vol": 0.26, "rate": 0.9, "clip": 1.1, "note": "拉开看全条"},
+  ],
   "news-card-desk": [
     {"t": 0.1, "name": "pk:paper-paper-slide", "vol": 0.5, "clip": 0.9, "note": "卡A铺上"},
     {"t": 1, "name": "pk:text-marker-pen-line", "vol": 0.45, "clip": 0.4, "note": "划重点"},
@@ -197,6 +229,30 @@ window.SFX_MAP = {
   "particle-weld-transition": [
     {"t": 0.8, "name": "pk:transition-sweep-scifi-fast", "vol": 0.34, "clip": 0.6, "note": "粒子炸开"},
   ],
+  "parallel-items-with-host": [
+    /* 七式巡演，每式一镜三记（成片一镜只用一式 → 抄对应那三记；卡内相对秒 = 下列 t − 该式起点 k×3.1） */
+    {"t": 0.4, "name": "pk:ui-pop", "vol": 0.5, "note": "① 卡1"},
+    {"t": 1.0, "name": "pk:ui-pop", "vol": 0.5, "rate": 1.08, "note": "① 卡2"},
+    {"t": 1.6, "name": "pk:ui-pop", "vol": 0.5, "rate": 0.94, "note": "① 卡3"},
+    {"t": 3.5, "name": "pk:ui-ui-click-tone", "vol": 0.4, "note": "② 第一条回彩"},
+    {"t": 4.1, "name": "pk:ui-ui-click-tone", "vol": 0.4, "rate": 1.06, "note": "② 第二条回彩"},
+    {"t": 4.7, "name": "pk:ui-ui-click-tone", "vol": 0.4, "rate": 1.12, "note": "② 第三条回彩"},
+    {"t": 6.6, "name": "pk:paper-paper-slide", "vol": 0.4, "clip": 0.5, "note": "③ 卡1 滑入"},
+    {"t": 7.2, "name": "pk:paper-paper-slide", "vol": 0.4, "clip": 0.5, "rate": 1.05, "note": "③ 卡2 滑入"},
+    {"t": 7.8, "name": "pk:paper-paper-slide", "vol": 0.4, "clip": 0.5, "rate": 0.96, "note": "③ 卡3 滑入"},
+    {"t": 9.7, "name": "pk:paper-paper-slide", "vol": 0.42, "clip": 0.6, "note": "④ 第一张压上"},
+    {"t": 10.3, "name": "pk:paper-paper-slide", "vol": 0.42, "clip": 0.6, "rate": 1.05, "note": "④ 第二张压上"},
+    {"t": 10.9, "name": "pk:paper-paper-slide", "vol": 0.42, "clip": 0.6, "rate": 1.1, "note": "④ 第三张压上"},
+    {"t": 12.8, "name": "pk:text-marker-pen-line", "vol": 0.35, "dur": 0.3, "note": "⑤ 第一条擦入"},
+    {"t": 13.4, "name": "pk:text-marker-pen-line", "vol": 0.35, "dur": 0.3, "rate": 1.05, "note": "⑤ 第二条擦入"},
+    {"t": 14.0, "name": "pk:text-marker-pen-line", "vol": 0.35, "dur": 0.3, "rate": 1.1, "note": "⑤ 第三条擦入"},
+    {"t": 15.9, "name": "pk:transition-wind-swoosh-short", "vol": 0.3, "clip": 0.5, "note": "⑥ 第一条斜带滑入"},
+    {"t": 16.5, "name": "pk:transition-wind-swoosh-short", "vol": 0.3, "clip": 0.5, "rate": 1.06, "note": "⑥ 第二条斜带滑入"},
+    {"t": 17.1, "name": "pk:transition-wind-swoosh-short", "vol": 0.3, "clip": 0.5, "rate": 1.12, "note": "⑥ 第三条斜带滑入"},
+    {"t": 19.0, "name": "pk:transition-wind-swoosh-short", "vol": 0.28, "clip": 0.6, "rate": 0.9, "note": "⑦ 背景换第一张"},
+    {"t": 19.75, "name": "pk:transition-wind-swoosh-short", "vol": 0.28, "clip": 0.6, "rate": 0.95, "note": "⑦ 背景换第二张"},
+    {"t": 20.5, "name": "pk:transition-wind-swoosh-short", "vol": 0.28, "clip": 0.6, "note": "⑦ 背景换第三张"},
+  ],
   "pencil-sketch-draw": [
     {"t": 0.3, "name": "pk:text-pencil-write-short", "vol": 0.45, "clip": 0.9, "note": "铅笔描1"},
     {"t": 1.65, "name": "pk:text-pencil-write-short", "vol": 0.45, "rate": 0.95, "clip": 0.9, "note": "铅笔描2"},
@@ -224,6 +280,11 @@ window.SFX_MAP = {
     {"t": 0.4, "name": "pk:ui-pop", "vol": 0.24, "note": "行1"},
     {"t": 1.26, "name": "pk:text-marker-pen-line", "vol": 0.42, "clip": 0.35, "note": "高亮框展开"},
   ],
+  "rack-focus-pair": [
+    {"t": 0.2, "name": "pk:paper-paper-slide", "vol": 0.35, "clip": 0.6, "note": "两张入场"},
+    {"t": 2.0, "name": "pk:camera-ui-zoom-in", "vol": 0.4, "clip": 0.7, "note": "焦点交给后张"},
+    {"t": 4.6, "name": "pk:camera-ui-zoom-in", "vol": 0.4, "rate": 0.94, "clip": 0.7, "note": "焦点交回前张"},
+  ],
   "scribble-annotation": [
     {"t": 0.5, "name": "pk:text-marker-pen-line", "vol": 0.45, "clip": 0.55, "note": "圈注1"},
     {"t": 1.6, "name": "pk:text-marker-pen-line", "vol": 0.42, "rate": 1.12, "clip": 0.4, "note": "圈注2"},
@@ -245,10 +306,40 @@ window.SFX_MAP = {
   "speed-slab-title": [
     {"t": 0.66, "name": "pk:transition-wind-swoosh-short", "vol": 0.45, "clip": 0.45, "note": "紫块飞入"},
   ],
+  "split-60-40-story": [
+    {"t": 0.3, "name": "pk:ui-ui-click-tone", "vol": 0.3, "note": "标题升入"},
+    {"t": 1.0, "name": "pk:ui-pop", "vol": 0.45, "note": "chip①"},
+    {"t": 1.6, "name": "pk:ui-pop", "vol": 0.45, "rate": 1.08, "note": "chip②"},
+    {"t": 2.2, "name": "pk:ui-pop", "vol": 0.45, "rate": 0.94, "note": "chip③"},
+  ],
+  "split-compare-slider": [
+    /* 分割线每次"动起来"一记纸滑（clip 盖住滑动段），停靠不配；两图极慢推与标签亮起不配 */
+    {"t": 0.6, "name": "pk:paper-paper-slide", "vol": 0.42, "clip": 1.4, "note": "分割线从右端滑到中线"},
+    {"t": 3.5, "name": "pk:ui-ui-click-tone", "vol": 0.3, "rate": 1.08, "clip": 0.4, "note": "nudge 到 42%（看右边）"},
+    {"t": 4.5, "name": "pk:paper-paper-slide", "vol": 0.4, "rate": 0.96, "clip": 1.0, "note": "滑到近端几乎全露右图"},
+    {"t": 7.0, "name": "pk:paper-paper-slide", "vol": 0.36, "rate": 1.04, "clip": 1.0, "note": "回中线"},
+  ],
+  "stack-fan-out": [
+    {"t": 0.2, "name": "pk:paper-paper-slide", "vol": 0.35, "clip": 0.4, "note": "卡堆现身"},
+    {"t": 1.0, "name": "pk:transition-wind-swoosh-short", "vol": 0.4, "note": "扇开"},
+    {"t": 2.5, "name": "pk:paper-paper-slide", "vol": 0.4, "clip": 0.6, "note": "铺平成一行"},
+    {"t": 3.1, "name": "pk:mech-lock-quick", "vol": 0.3, "note": "铺平落定"},
+  ],
   "step-timeline-vertical": [
     {"t": 0.52, "name": "pk:mech-lock-quick", "vol": 0.34, "clip": 0.5, "note": "节点1"},
     {"t": 0.7, "name": "pk:mech-lock-quick", "vol": 0.36, "rate": 1.08, "clip": 0.5, "note": "节点2"},
     {"t": 0.88, "name": "pk:mech-lock-quick", "vol": 0.38, "rate": 1.16, "clip": 0.5, "note": "节点3"},
+  ],
+  "still-layout-relay": [
+    /* 两式巡演，每式四记（成片一镜只用一式 → 抄对应那四记；② 的卡内相对秒 = 下列 t − 8.08） */
+    {"t": 0.3, "name": "pk:paper-paper-slide", "vol": 0.4, "clip": 0.5, "note": "① 主图落"},
+    {"t": 0.8, "name": "pk:paper-paper-slide", "vol": 0.35, "clip": 0.5, "rate": 1.06, "note": "① 两佐证滑入（一记盖两张）"},
+    {"t": 2.4, "name": "pk:ui-ui-click-tone", "vol": 0.4, "note": "① 亮佐证 1"},
+    {"t": 4.2, "name": "pk:ui-ui-click-tone", "vol": 0.4, "rate": 1.06, "note": "① 亮佐证 2"},
+    {"t": 8.38, "name": "pk:paper-paper-slide", "vol": 0.4, "clip": 0.5, "note": "② 三张滑入（一记盖三张）"},
+    {"t": 9.48, "name": "pk:ui-ui-click-tone", "vol": 0.4, "note": "② 亮左"},
+    {"t": 10.88, "name": "pk:ui-ui-click-tone", "vol": 0.4, "rate": 1.06, "note": "② 亮中"},
+    {"t": 12.28, "name": "pk:ui-ui-click-tone", "vol": 0.4, "rate": 1.12, "note": "② 亮右"},
   ],
   "subscribe-cta": [
     {"t": 1.4, "name": "pk:ui-ui-click-tone", "vol": 0.5, "note": "点订阅"},
@@ -369,5 +460,113 @@ window.SFX_MAP = {
     {"t": 0.05, "name": "pk:ui-pop", "vol": 0.5, "rate": 0.94, "note": "卡弹入"},
     {"t": 0.34, "name": "paper", "vol": 0.26, "rate": 1.12, "note": "内容错峰铺底"},
     {"t": 2.58, "name": "click", "vol": 0.55, "note": "点击关注"},
+  ],
+  "scanline-annotate": [
+    {"t": 0.5, "name": "pk:data-data-load-os", "vol": 0.3, "clip": 2.4, "note": "扫描线匀速掠过"},
+    {"t": 1.22, "name": "pk:ui-ui-click-tone", "vol": 0.4, "note": "取景框 1 收拢"},
+    {"t": 2.07, "name": "pk:ui-ui-click-tone", "vol": 0.4, "note": "取景框 2 收拢"},
+    {"t": 2.36, "name": "pk:ui-ui-click-tone", "vol": 0.4, "note": "取景框 3 收拢"},
+    {"t": 2.67, "name": "pk:ui-ui-click-tone", "vol": 0.4, "note": "取景框 4 收拢"},
+    {"t": 3.1, "name": "pk:mech-lock-quick", "vol": 0.4, "note": "分析完成"},
+  ],
+  "crash-zoom-punch": [
+    {"t": 1.0, "name": "pk:camera-ui-zoom-in", "vol": 0.5, "clip": 0.5, "note": "6 帧急推"},
+    {"t": 1.2, "name": "pk:mech-lock-quick", "vol": 0.35, "note": "回收落定"},
+  ],
+  "word-slot-cycle": [
+    {"t": 0.2, "name": "pk:paper-paper-slide", "vol": 0.3, "clip": 0.5, "note": "句干 + 胶囊入场"},
+    {"t": 1.1, "name": "pk:ui-ui-click-tone", "vol": 0.35, "note": "换词 1"},
+    {"t": 1.8, "name": "pk:ui-ui-click-tone", "vol": 0.38, "rate": 1.03, "note": "换词 2"},
+    {"t": 2.5, "name": "pk:ui-ui-click-tone", "vol": 0.4, "rate": 1.06, "note": "换词 3"},
+    {"t": 3.55, "name": "pk:transition-wind-swoosh-short", "vol": 0.3, "clip": 0.4, "note": "末 pill 上飞"},
+    {"t": 3.95, "name": "pk:mech-lock-quick", "vol": 0.45, "note": "结论过冲落定"},
+  ],
+  "lead-word-zoom-assemble": [
+    {"t": 0.1, "name": "pk:ui-pop", "vol": 0.4, "note": "首词 2.3× 现"},
+    {"t": 0.5, "name": "pk:camera-ui-zoom-in", "vol": 0.35, "clip": 0.6, "note": "缩回 + 左滑"},
+    {"t": 0.7, "name": "pk:paper-paper-slide", "vol": 0.3, "clip": 0.5, "note": "后续词推入（一记盖整段）"},
+    {"t": 1.4, "name": "pk:transition-transition-soft", "vol": 0.25, "clip": 0.5, "note": "整行上移 + 副行"},
+  ],
+  "title-demote-to-label": [
+    {"t": 0.2, "name": "pk:transition-transition-soft", "vol": 0.3, "clip": 0.5, "note": "标题显影"},
+    {"t": 1.3, "name": "pk:camera-ui-zoom-in", "vol": 0.35, "clip": 0.7, "note": "降格飞到左上"},
+    {"t": 1.7, "name": "pk:ui-pop", "vol": 0.35, "note": "内容块 1 生长"},
+    {"t": 2.25, "name": "pk:ui-pop", "vol": 0.38, "note": "内容块 2 生长"},
+    {"t": 2.8, "name": "pk:ui-pop", "vol": 0.4, "note": "内容块 3 生长"},
+  ],
+  "unit-grid-proportion": [
+    {"t": 0.2, "name": "pk:data-data-load-os", "vol": 0.3, "clip": 1.0, "note": "网格分环生长"},
+    {"t": 1.4, "name": "pk:ui-pop", "vol": 0.4, "note": "大数字入场"},
+    {"t": 1.7, "name": "pk:counter-clock-tick-single", "vol": 0.3, "clip": 1.3, "note": "逐格染色 + 计数起点（连发只配起点）"},
+    {"t": 3.0, "name": "pk:mech-lock-quick", "vol": 0.4, "note": "37 落定"},
+  ],
+  "source-converge": [
+    {"t": 0.5, "name": "pk:text-marker-pen-line", "vol": 0.35, "clip": 0.9, "note": "四条曲线逐路接通"},
+    {"t": 1.5, "name": "pk:transition-air-whoosh-powerful", "vol": 0.25, "clip": 1.5, "note": "节点沿线汇入"},
+    {"t": 2.85, "name": "pk:mech-lock-quick", "vol": 0.45, "note": "吞并脉冲"},
+    {"t": 3.8, "name": "pk:paper-paper-slide", "vol": 0.3, "clip": 0.6, "note": "结果滑到居中"},
+  ],
+  "line-carry-transition": [
+    {"t": 0.4, "name": "pk:text-marker-pen-line", "vol": 0.4, "clip": 0.6, "note": "A 下划线画出"},
+    {"t": 1.2, "name": "pk:transition-wind-swoosh-short", "vol": 0.35, "clip": 1.2, "note": "镜头跟线横移"},
+    {"t": 3.2, "name": "pk:mech-lock-quick", "vol": 0.4, "note": "画框闭合（转场落点只留这一记，B 淡入不配）"},
+  ],
+  "host-card-glass-board": [
+    {"t": 0.2, "name": "pk:transition-transition-soft", "vol": 0.3, "clip": 0.7, "note": "玻璃板显影"},
+    {"t": 0.3, "name": "pk:paper-paper-slide", "vol": 0.3, "clip": 0.5, "note": "人物竖卡滑入"},
+    {"t": 1.6, "name": "pk:ui-pop", "vol": 0.4, "note": "tile ① 文稿"},
+    {"t": 2.5, "name": "pk:ui-pop", "vol": 0.42, "rate": 1.03, "note": "tile ② 配音"},
+    {"t": 3.4, "name": "pk:ui-pop", "vol": 0.45, "rate": 1.06, "note": "tile ③ 成片"},
+    {"t": 4.1, "name": "pk:mech-lock-quick", "vol": 0.4, "note": "结果胶囊落定"},
+  ],
+  "word-relay-filmstrip": [
+    {"t": 0.4, "name": "pk:ui-pop", "vol": 0.35, "note": "首词落位"},
+    {"t": 1.8, "name": "pk:paper-paper-slide", "vol": 0.35, "clip": 0.45, "note": "切词 1 · 胶片步进一卡"},
+    {"t": 3.2, "name": "pk:paper-paper-slide", "vol": 0.35, "rate": 1.03, "clip": 0.45, "note": "切词 2"},
+    {"t": 4.6, "name": "pk:paper-paper-slide", "vol": 0.35, "rate": 1.06, "clip": 0.45, "note": "切词 3"},
+    {"t": 4.8, "name": "pk:mech-lock-quick", "vol": 0.3, "note": "末词（强调色）落定"},
+  ],
+  "doc-park-left-pill-deal": [
+    {"t": 0.9, "name": "pk:transition-transition-soft", "vol": 0.3, "clip": 0.8, "note": "文档驻留到左侧"},
+    {"t": 1.9, "name": "pk:ui-pop", "vol": 0.4, "note": "发牌 1"},
+    {"t": 3.2, "name": "pk:ui-pop", "vol": 0.42, "rate": 1.03, "note": "发牌 2"},
+    {"t": 4.5, "name": "pk:ui-pop", "vol": 0.44, "rate": 1.06, "note": "发牌 3"},
+  ],
+  "flying-words": [
+    {"t": 0.2, "name": "pk:transition-air-whoosh-powerful", "vol": 0.18, "clip": 2.0, "note": "隧道底噪：背景层只配一记极轻，不跟词"},
+  ],
+  "info-card-assemble": [
+    {"t": 0.0, "name": "pk:paper-paper-slide", "vol": 0.3, "clip": 0.5, "note": "封面 + 标题落位"},
+    {"t": 0.67, "name": "pk:ui-pop", "vol": 0.35, "note": "标签 pop（一记盖三枚）"},
+    {"t": 1.33, "name": "pk:ui-ui-click-tone", "vol": 0.35, "note": "价格行"},
+    {"t": 2.5, "name": "pk:text-keyboard", "vol": 0.3, "clip": 0.5, "note": "三行要点涌出"},
+    {"t": 2.83, "name": "pk:text-marker-pen-line", "vol": 0.4, "clip": 0.35, "note": "马克底块刷过"},
+    {"t": 3.33, "name": "pk:ui-pop", "vol": 0.3, "rate": 1.08, "note": "色卡点亮"},
+  ],
+  "chip-grid-single-select": [
+    {"t": 0.5, "name": "pk:paper-paper-slide", "vol": 0.3, "clip": 0.6, "note": "候选 chip 铺开"},
+    {"t": 2.03, "name": "pk:mech-lock-quick", "vol": 0.45, "note": "按下 + 反黑落定（灰闪与反黑相隔一帧，只配一记）"},
+    {"t": 3.5, "name": "pk:transition-wind-swoosh-short", "vol": 0.3, "clip": 0.4, "note": "黑 chip 上移收窄"},
+    {"t": 3.8, "name": "pk:data-data-load-os", "vol": 0.3, "clip": 0.9, "note": "算式逐词加深"},
+  ],
+  "reticle-lock-on": [
+    {"t": 1.3, "name": "pk:transition-wind-swoosh-short", "vol": 0.4, "clip": 0.35, "note": "四角画外扑入"},
+    {"t": 1.83, "name": "pk:mech-lock-quick", "vol": 0.55, "note": "咬合帧（回弹 + 微亮 + 标签同帧，只配这一记）"},
+  ],
+  "error-retype": [
+    {"t": 0.7, "name": "pk:text-keyboard", "vol": 0.4, "clip": 0.36, "note": "打错句（一记盖整段）"},
+    {"t": 1.61, "name": "pk:text-keyboard", "vol": 0.3, "rate": 1.15, "clip": 0.24, "note": "退掉（更快）"},
+    {"t": 1.97, "name": "pk:text-keyboard", "vol": 0.4, "rate": 1.1, "clip": 0.24, "note": "零犹豫重打"},
+    {"t": 3.06, "name": "pk:mech-lock-quick", "vol": 0.25, "note": "完稿光标摘除"},
+  ],
+  "countdown-arc-scatter": [
+    {"t": 0.3, "name": "pk:transition-wind-swoosh-short", "vol": 0.35, "clip": 0.6, "note": "整盘扫回"},
+    {"t": 0.87, "name": "pk:mech-lock-quick", "vol": 0.4, "note": "扫停 · 选中数落位"},
+    {"t": 0.95, "name": "pk:paper-paper-slide", "vol": 0.25, "clip": 0.5, "note": "标题逐词解糊"},
+    {"t": 1.75, "name": "pk:ui-ui-click-tone", "vol": 0.3, "note": "末词染色"},
+  ],
+  "split-text-stagger": [
+    {"t": 0.3, "name": "pk:paper-paper-slide", "vol": 0.35, "clip": 0.9, "note": "逐字裂升（一记盖整段）"},
+    {"t": 1.34, "name": "pk:mech-lock-quick", "vol": 0.3, "note": "基线长满 · 末字落定"},
   ],
 };

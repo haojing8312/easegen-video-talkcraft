@@ -20,9 +20,17 @@
 //        [--all | --changed s14 | --only s13,s14,s15]     # 缺省 = 只渲 seg-dir 里缺失的段
 //        [--concat out/assembled.mp4]                      # 拼装（video-only）
 //        [--audio out/full-mix.wav] [--force-audio]        # 整条音轨（缓存过时长+指纹校验才复用）
+//        [--audio-concurrency 4]                           # 音轨渲染并发 tab 数（音轨无光栅问题，不受视频段单并发纪律约束）
 //        [--mux out/preview.mp4]                           # assembled + audio → 有声预览
+//        [--preview-dir out/preview]                        # 本次渲的每一段各出一条有声单镜预览 <dir>/<id>.mp4，不必等整片拼装：
+//                                                           #   配 --audio：声音从整条音轨按段边界裁（⑥-1.5 逐镜节奏，整条音轨反正要渲）
+//        [--seg-audio]                                      # 配 --preview-dir：只渲本次各段自己区间的音频，不渲、不缓存整条音轨——
+//                                                           #   ⑤-1 首镜先做先确认用（其余镜头还是占位，整条音轨没意义）；与 --audio 二选一，不能配 --mux
 //        [--props '{"k":1}' | --props @props.json]         # 合成 inputProps（工作台 Main 等吃工程 JSON 的合成必须给）
 //        [--public-dir .render-public]                     # 覆盖 public/（Remotion 静态服务器拒绝符号链接素材时先解引用同步）
+//        [--image-format png|jpeg] [--jpeg-quality 95] [--crf 18]   # 中间帧/编码：覆盖 remotion.config.ts；不给则读配置，配置没设用 Remotion 默认（JPEG-80）
+//        [--browser /path/to/chrome-headless-shell]        # 浏览器可执行文件（离线机 / 复用 Playwright 的 headless shell）
+// 生效的编码参数每次打在日志第一行（imageFormat/jpegQuality/crf）——别再"以为是 PNG"。
 // shots.json = 分镜表导出的 [{"id","start","end"}]（与 shots.ts 同源，beat_lint --shots 同一份）；
 //   id 必须唯一且不含路径分隔符——它直接就是段缓存文件名 <seg-dir>/<id>.mp4。
 import {createRequire} from 'node:module';
@@ -30,7 +38,7 @@ import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import {loadProjectBundleOptions, projectRenderOptions, parseInputProps} from './remotion_project_config.mjs';
+import {loadProjectBundleOptions, projectRenderOptions, projectEncodeOptions, describeEncodeOptions, parseInputProps} from './remotion_project_config.mjs';
 
 const args = process.argv.slice(2);
 const opt = (name, dflt) => {
@@ -44,19 +52,35 @@ const opt = (name, dflt) => {
   return v;
 };
 const has = (name) => args.includes(`--${name}`);
+const selectionFlags = ['all', 'changed', 'only'].filter(has);
+if (selectionFlags.length > 1) {
+  console.error(`--all、--changed、--only 互斥，只能指定一个渲染范围（收到：${selectionFlags.map((name) => `--${name}`).join(', ')}）`);
+  process.exit(2);
+}
+const changedId = opt('changed', null);
+const onlyIds = has('only') ? opt('only', null).split(',') : null;
 const projDir = process.cwd();
 const entry = opt('entry', 'src/entry.ts');
 const shotsPath = opt('shots', 'shots.json');
 const segDir = opt('seg-dir', 'out/segments');
 const parallel = Number(opt('parallel', '4'));
+const audioConcurrency = Number(opt('audio-concurrency', '4'));
+if (!Number.isInteger(audioConcurrency) || audioConcurrency < 1) { console.error('--audio-concurrency 需为 ≥1 的整数'); process.exit(2); }
 if (!Number.isInteger(parallel) || parallel < 1) {   // NaN→0 个 worker 会一段不渲直接进拼装（评审 P1-3）
   console.error(`--parallel 需为 ≥1 的整数，得到：${opt('parallel', '4')}`);
   process.exit(2);
 }
-
-const require = createRequire(path.join(projDir, 'package.json'));
-const {bundle} = require('@remotion/bundler');
-const {selectComposition, renderMedia, getCompositions} = require('@remotion/renderer');
+// 输出侧参数先校验再 bundle：参数组合错了不该等段渲完才知道
+const audioOut = opt('audio', null);
+const previewDir = opt('preview-dir', null);
+const muxOut = opt('mux', null);
+const segAudio = has('seg-audio');
+if (segAudio) {   // 预览专用的段音频：只服务 --preview-dir，绝不进拼装 / 交付（纪律 A）
+  if (!previewDir) { console.error('--seg-audio 只配 --preview-dir 用（单镜预览的段音频）'); process.exit(2); }
+  if (audioOut) { console.error('--seg-audio 与 --audio 二选一：要整条音轨就别开 --seg-audio'); process.exit(2); }
+  if (muxOut) { console.error('--mux 需要整条音轨（纪律 A：音轨整条不分段）——请用 --audio，不能用 --seg-audio'); process.exit(2); }
+}
+if (previewDir && !audioOut && !segAudio) { console.error('--preview-dir 需要 --audio（整条音轨裁段）或 --seg-audio（只渲本段音频）'); process.exit(2); }
 
 const shots = JSON.parse(fs.readFileSync(shotsPath, 'utf8'));
 if (!Array.isArray(shots) || !shots.length ||
@@ -85,13 +109,39 @@ for (let i = 1; i < shots.length; i++) {
   }
 }
 
+// 渲染范围只依赖镜头表，先校验再加载 Remotion / 打包 / 启动浏览器。
+const changedIndex = changedId === null ? -1 : shots.findIndex((s) => s.id === changedId);
+if (changedId !== null && changedIndex < 0) {
+  console.error(`--changed 只接受一个已知镜头 id，未找到：${changedId || '（空）'}；批量选段请用 --only 并显式包含受影响的邻镜`);
+  process.exit(2);
+}
+if (onlyIds !== null) {
+  const unknownIds = onlyIds.filter((id) => !shots.some((s) => s.id === id));
+  if (unknownIds.length) {
+    console.error(`--only 里有未知镜头 id：${unknownIds.map((id) => id || '（空）').join(', ')}`);
+    process.exit(2);
+  }
+  if (new Set(onlyIds).size !== onlyIds.length) {
+    console.error(`--only 镜头 id 重复：${onlyIds.join(', ')}`);
+    process.exit(2);
+  }
+}
+
+const require = createRequire(path.join(projDir, 'package.json'));
+const {bundle} = require('@remotion/bundler');
+const {selectComposition, renderMedia, getCompositions} = require('@remotion/renderer');
+
 const t0 = Date.now();
 // 必须带上工程 remotion.config.ts 里的 webpack alias / publicDir 等（bundle() 自己不读配置文件，评审 P1）
 const bundleOpts = await loadProjectBundleOptions(require, projDir);
 const publicDirFlag = opt('public-dir', null);
 if (publicDirFlag) bundleOpts.publicDir = path.resolve(projDir, publicDirFlag);   // 命令行覆盖 remotion.config.ts 的 setPublicDir
 const inputProps = parseInputProps(opt('props', null), projDir);
-const renderOpts = projectRenderOptions(require);   // browserExecutable / gl / chromeMode（配置文件里设了才有）
+const cliOverrides = {browser: opt('browser', null), imageFormat: opt('image-format', null), jpegQuality: opt('jpeg-quality', null), crf: opt('crf', null)};
+if (cliOverrides.imageFormat && !['png', 'jpeg'].includes(cliOverrides.imageFormat)) { console.error('--image-format 只接受 png | jpeg'); process.exit(2); }
+const renderOpts = projectRenderOptions(require, cliOverrides);   // browserExecutable / gl / chromeMode（配置文件里设了才有 + --browser）
+const encodeOpts = projectEncodeOptions(require, cliOverrides);   // imageFormat / jpegQuality / crf / pixelFormat（配置里显式设了才有 + 命令行覆盖）
+console.log(`encode: ${describeEncodeOptions(encodeOpts)}`);
 const serveUrl = await bundle({entryPoint: path.join(projDir, entry), ...bundleOpts, onProgress: () => {}});
 const compId = opt('comp', null);
 let composition;
@@ -133,29 +183,27 @@ for (let i = 0; i < segs.length; i++) {
 // —— 选段 ——
 let todo;
 if (has('all')) todo = segs;
-else if (opt('changed', null)) {
-  const id = opt('changed');
-  const k = segs.findIndex((s) => s.id === id);
-  if (k < 0) { console.error(`未找到镜头 ${id}`); process.exit(2); }
+else if (changedId !== null) {
   // 镜头衔接的 lead/tail 交叠会波及邻镜边缘几帧 → 邻段一并重渲
-  todo = segs.slice(Math.max(0, k - 1), Math.min(segs.length, k + 2));
-} else if (opt('only', null)) {
-  const ids = opt('only').split(',');
-  todo = segs.filter((s) => ids.includes(s.id));
-  if (todo.length !== ids.length) { console.error('--only 里有未知镜头 id'); process.exit(2); }
+  todo = segs.slice(Math.max(0, changedIndex - 1), Math.min(segs.length, changedIndex + 2));
+} else if (onlyIds !== null) {
+  todo = segs.filter((s) => onlyIds.includes(s.id));
 } else {
   todo = segs.filter((s) => !fs.existsSync(s.file));
 }
 fs.mkdirSync(segDir, {recursive: true});
 console.log(`待渲 ${todo.length}/${segs.length} 段（并行 ${parallel}）：${todo.map((s) => s.id).join(' ') || '（无）'}`);
 
+const ffprobeProgram = process.env.TALKCRAFT_FFPROBE_PROGRAM || 'ffprobe';
+const ffprobePrefix = process.env.TALKCRAFT_FFPROBE_ARGS
+  ? JSON.parse(process.env.TALKCRAFT_FFPROBE_ARGS) : [];
 const probeFrames = (f) =>
   // csv=p=0 的输出带尾逗号（"129,"），Number() 会 NaN——只留数字位
-  Number(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-count_packets',
+  Number(execFileSync(ffprobeProgram, [...ffprobePrefix, '-v', 'error', '-select_streams', 'v:0', '-count_packets',
     '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', f], {encoding: 'utf8'}).replace(/[^0-9]/g, ''));
 // 音轨用容器时长折成帧数（WAV 无 packet 计数可言）
 const probeDurationFrames = (f) =>
-  Math.round(Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration',
+  Math.round(Number(execFileSync(ffprobeProgram, [...ffprobePrefix, '-v', 'error', '-show_entries', 'format=duration',
     '-of', 'csv=p=0', f], {encoding: 'utf8'}).replace(/[^0-9.]/g, '')) * fps);
 
 // —— K 段并行，每段 concurrency:1（段内单进程连续渲，防光栅相位抖动）——
@@ -167,7 +215,7 @@ const worker = async () => {
     const st = Date.now();
     const tmp = seg.file.replace(/\.mp4$/, '.rendering.mp4');   // 先写临时名：中断的半截文件不许被当缓存
     await renderMedia({
-      composition, serveUrl, codec: 'h264', outputLocation: tmp, inputProps, ...renderOpts,
+      composition, serveUrl, codec: 'h264', outputLocation: tmp, inputProps, ...renderOpts, ...encodeOpts,
       frameRange: [seg.from, seg.to], muted: true, concurrency: 1,   // 纪律 A：视频段一律无声
     });
     const got = probeFrames(tmp);
@@ -250,7 +298,6 @@ const audioFingerprint = () => {
   };
 };
 const FP_LABEL = {assets: 'public/ 音频素材变了（换过配音/SFX 文件）', props: 'inputProps 变了（--props 内容不同：工程 JSON 里的音效位置/音量等）', timing: '音频时序配置文件变了（beats/cues/sfx 等）'};
-const audioOut = opt('audio', null);
 if (audioOut) {
   const fpFile = `${audioOut}.fp.json`;
   const fp = audioFingerprint();
@@ -271,7 +318,11 @@ if (audioOut) {
     const st = Date.now();
     console.log(`audio 重渲（${reason}）…`);
     const tmp = audioOut.replace(/(\.[^./\\]+)?$/, '.rendering$1');   // out/full-mix.wav → out/full-mix.rendering.wav
-    await renderMedia({composition, serveUrl, codec: 'wav', outputLocation: tmp, inputProps, ...renderOpts});
+    // 音轨渲染没有光栅问题（纪律 A 只管视频段），不受单并发约束：多 tab 并发切帧、结果确定性不变。
+    // imageFormat:'none' 只是不截图，实测省得很少（2026-09-06 v4 116s 片：446s → 419s，浏览器逐帧 seek 才是主成本）；
+    // 真正的提速来自 concurrency（--audio-concurrency，默认 4；实测见 SKILL.md ⑥-2 注释）。
+    await renderMedia({composition, serveUrl, codec: 'wav', outputLocation: tmp, inputProps, ...renderOpts,
+      imageFormat: 'none', concurrency: audioConcurrency});
     const got = probeDurationFrames(tmp);
     if (!(Math.abs(got - TOTAL) <= 1)) {
       console.error(`FAIL: 音轨时长 ${got} 帧 != 合成 ${TOTAL} 帧（临时文件留在 ${tmp}）`);
@@ -285,8 +336,40 @@ if (audioOut) {
   }
 }
 
+// —— 单镜有声预览（⑤-1 首镜先做先确认 / ⑥-1.5 逐镜节奏）：本次渲的每段 → <preview-dir>/<id>.mp4 ——
+//   声音两条路：--audio 从整条音轨按段边界裁一刀（帧边界与段表同一 Math.round 规则，纪律 B）；
+//   --seg-audio 只渲该段 frameRange 的音频（⑤-1 时其余镜头都是占位，整条音轨没意义，也省掉那 3 分钟）。
+//   段音频只活在这条预览里：渲完即删，不落 seg-dir、不写指纹——拼装 / 交付永远走 --audio 整条音轨（纪律 A）。
+if (previewDir) {
+  if (!todo.length) console.warn('--preview-dir：本次没有渲任何段（缓存全在）——要出预览请配 --only <id>');
+  fs.mkdirSync(previewDir, {recursive: true});
+  for (const seg of todo) {
+    const out = path.join(previewDir, `${seg.id}.mp4`);
+    if (segAudio) {
+      const st = Date.now();
+      const segWav = path.join(previewDir, `${seg.id}.audio.rendering.wav`);
+      await renderMedia({composition, serveUrl, codec: 'wav', outputLocation: segWav, inputProps, ...renderOpts,
+        frameRange: [seg.from, seg.to], imageFormat: 'none', concurrency: audioConcurrency});
+      const gotA = probeDurationFrames(segWav);
+      if (!(Math.abs(gotA - seg.frames) <= 1)) { console.error(`FAIL: 段音频 ${seg.id} 时长 ${gotA} 帧 != 段 ${seg.frames} 帧（文件留在 ${segWav}）`); process.exit(1); }
+      execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', seg.file, '-i', segWav,
+        '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-shortest', out]);
+      fs.unlinkSync(segWav);
+      const got = probeFrames(out);
+      if (got !== seg.frames) { console.error(`FAIL: 预览 ${seg.id} 帧数 ${got} != ${seg.frames}`); process.exit(1); }
+      console.log(`preview → ${out}  ${seg.id} 帧 ${seg.from}-${seg.to} + 本段音频 ${(seg.frames / fps).toFixed(2)}s（段音频 ${((Date.now() - st) / 1000).toFixed(0)}s，预览专用已删）✓`);
+      continue;
+    }
+    execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', seg.file,
+      '-ss', (seg.from / fps).toFixed(6), '-t', (seg.frames / fps).toFixed(6), '-i', audioOut,
+      '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-shortest', out]);
+    const got = probeFrames(out);
+    if (got !== seg.frames) { console.error(`FAIL: 预览 ${seg.id} 帧数 ${got} != ${seg.frames}`); process.exit(1); }
+    console.log(`preview → ${out}  ${seg.id} 帧 ${seg.from}-${seg.to} + 音轨 ${(seg.from / fps).toFixed(2)}s 起 ${(seg.frames / fps).toFixed(2)}s ✓`);
+  }
+}
+
 // —— 混入音轨（预览口径；交付仍走 SKILL.md ⑧ 的 loudnorm）——
-const muxOut = opt('mux', null);
 if (muxOut) {
   if (!concatOut || !audioOut) { console.error('--mux 需要同时给 --concat 与 --audio'); process.exit(2); }
   execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', concatOut, '-i', audioOut,

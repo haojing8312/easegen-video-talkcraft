@@ -16,6 +16,8 @@ name: highlighter-sweep
 等于涂掉证据）、**扫速对齐朗读**（0.4~0.8s，跟着语音走才像"现场划"而不是特效）、
 **必须压暗其余文字**（只加高亮不减环境，强调失效一半）。
 
+常见于：Vox、Johnny Harris、Cleo Abram、James Jani。
+
 ## 动效核心
 - 引用截图卡片先在屏（浅纸色 #f7f4ea 卡片 + 微倾斜 -0.4° + 深投影），全程 8s 线性极缓推近到 1.025 倍防呆滞
 - 关键句包一层 `position:relative` 的 span，内部绝对定位色块：#FFE949、opacity 0.6、`mix-blend-mode:multiply`
@@ -51,3 +53,8 @@ name: highlighter-sweep
 - 不属于本卡的：引用卡片的排版/边框/字体字号、示例文案、演示里曾有的 Ken Burns 缓推（那属于镜头层，由全局系统提供）。
 - 迁移接口：荧光色换 `background`（深底改 `mix-blend-mode: screen` + 高亮色）；扫速 `sweep` 对齐朗读时长；压暗程度 `dimTo` 随底色明度调；目标行的选择器与色块几何（left/right 内缩）按实际文字盒调整。
 - 底色要求：白底即可（multiply 在浅底天然成立；深底需换 screen 混合并复核字的可读性）。
+
+## 落位自检（2026-09-05 用户定版，选卡时抄进 SHOTBOOK 该镜自检列）
+- 标注几何（框 / 圈 / 线 / 箭头 / 放大镜锚点）一律由**目标的实测包围盒**反推——DOM `getBoundingClientRect` / `measureText`，四边留白 16~24px 等距，**不目测**。
+- 实现后抽该镜定妆帧核对：标注是否恰好套住 / 指向目标，偏差 **> 8px 返工**（`references/layout.md` §3）。
+- 目标会滚动 / 移动时，标注钉在内容坐标系随内容动（SKILL.md ③）。

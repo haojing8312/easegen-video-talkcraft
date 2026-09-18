@@ -17,6 +17,8 @@ name: scribble-annotation
 
 **线要粗且圆头**（4px 以下没有马克笔的"墨量感"）。
 
+常见于：Ali Abdaal、Johnny Harris、Vox、Mrwhosetheboss、LottieFiles arrow/underline 品类。
+
 ## 动效核心
 - 标注层 = 盖在假截图上的全屏 SVG（`viewBox="0 0 960 540"`，`pointer-events:none`），每笔一条 path，`fill:none`、`stroke-linecap/linejoin: round`、线宽 6px
 - **坐标绑定被标注元素，不写死**（命门）：被标注的 DOM 打 `data-ink="xx"`，运行时量它的盒子换算进 viewBox 再算 path——圈心 = 目标中心、下划线 y = 目标 baseline + 4px、箭尖 = 目标边缘外 8px。文字类目标要量**墨迹盒**（canvas `measureText` 的 `actualBoundingBoxAscent/Descent` + baseline），不是行盒：行盒上下带字体留白，照行盒画圈会整体偏高、下划线会飘出去 15px+
@@ -62,4 +64,7 @@ name: scribble-annotation
 - 迁移接口：`strokeW` 按画幅缩放（960 宽用 6px，1080p 上翻倍），`gapBetween`/`marks[].dur`/`headDur` 定节奏；换标注对象改 `data-ink` + `marks[].target`（坐标自动跟随，不需要重算 path）；`padX/padY`、`baselineGap`、`overhang`、`tipGap` 这几个像素量与 `strokeW` 同比缩放；换色改 `marks[].color`（浅底用红/黄，深底换亮色系）。目标不是 DOM（视频/图片素材）时，把 `boxOf()` 换成手填目标矩形，下游几何函数不用改。
 - 底色要求：白底即可（马克笔色压在浅底上是本卡的原生语境）。深底上需把标注色换成高亮度色系，否则粗线糊进背景。
 
-
+## 落位自检（2026-09-05 用户定版，选卡时抄进 SHOTBOOK 该镜自检列）
+- 标注几何（框 / 圈 / 线 / 箭头 / 放大镜锚点）一律由**目标的实测包围盒**反推——DOM `getBoundingClientRect` / `measureText`，四边留白 16~24px 等距，**不目测**。
+- 实现后抽该镜定妆帧核对：标注是否恰好套住 / 指向目标，偏差 **> 8px 返工**（`references/layout.md` §3）。
+- 目标会滚动 / 移动时，标注钉在内容坐标系随内容动（SKILL.md ③）。

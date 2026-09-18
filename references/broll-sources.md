@@ -5,14 +5,20 @@
 > 唯一例外义务是 API 条款级的一行简介致谢（规则 3），那是 API 使用条款，不是素材授权署名。
 
 ## 推荐组合
+- **实拍素材是必需项**（SKILL.md ③，2026-09-06 硬规）：全片零 B-roll / 图片 = 动效 + 口播人物 = 讲 PPT。视频找不到降级图片，图片也没有才进 SHOTBOOK「未完成 / 未采集清单」，
+  不允许写成"本片不做 B-roll"的设计决定。`scripts/preflight.py` 对账。
 - **视频 B-roll**：Pexels（主）→ Pixabay（备）→ Mixkit Free（逐条核对授权标签，见排除清单）→
-  Coverr（接受其条款时；API 免费档只够开发用）→ NASA（航天/卫星/地球类）→ 无结果降级"图片 + Ken Burns"
-- **配图**：Pexels photos → Pixabay images
+  Coverr（接受其条款时；API 免费档只够开发用）→ NASA（航天/卫星/地球类）→ 无结果降级 **图片**（下一条）
+- **图片**（照片 / 海报 / 插图，taxonomy 输入类型「图」；与视频同源同 key）：Pexels photos（**取 `original`**）→ Pixabay images（免费档长边上限 1280，只够 720p / 竖屏 / 配角小图）。
+  采集规格见下文「配图采集」；表现侧规则已齐：证据素材白边卡 + 唯一投影 + Ken Burns（design-language §1/§5）、静态素材必由相机动起来（taxonomy 运镜类）、
+  图片专用卡 stack-fan-out / gallery-wall-dolly / timeline-photo-strip / still-layout-relay / media-pop-in / grid-to-hero
 - **logo/图标**：Iconify `logos:` 彩色 → simple-icons via jsDelivr 单色 → Wikimedia Commons（**只取 PD/CC0**，
   按 LicenseShortName 字段过滤）。单色 logo 注意底色适配：深色 logo（如 Anthropic #181818）深底模式不可直用，
   需白底卡承载或取反色变体
 - **动效贴纸**：LottieFiles GraphQL（未文档化接口，做容错）
-- **新闻类话题首选**：Playwright 实时截图（GitHub/官网/榜单/HN），比泛用 B-roll 更有信息量
+- **新闻类话题首选**：Playwright 实时抓取真实页面（GitHub/官网/榜单/HN），比泛用 B-roll 更有信息量——
+  但成片里**不贴静态截图**：按下文「网页拍摄素材采集」采全页 2× 长图 + 坐标 JSON，交给滚/巡/放大/划四种拍法
+  （SKILL.md §③、shot-design.md §2④）
 
 ## 领域路由（检索前先想去哪家）
 
@@ -22,6 +28,20 @@
 | 自然 / 延时 / 抽象与动画背景 | Pixabay（量最大 500 万+；API 支持 `lang=zh` 中文查询词） |
 | 精选质感 / 竖屏 | Coverr、Mixkit Free（策展型，量小质高，均无可量产 API） |
 | 航天 / 火箭 / 地球俯瞰 / 科研 | NASA（公有领域，实测 8,692 条视频，免 key API） |
+
+## 分辨率下限与落盘（源表；此前"1080 优先"只写在 curl 注释里被读成能力上限，2026-09-06 提到这里）
+
+运镜共有纪律：**素材分辨率 ≥ 画幅 × 最大缩放**（taxonomy 运镜；1080p 横屏缓推 1.15 → 宽 ≥2208px，1.8× 放大镜 → 3456px）。
+
+| 源 | 取哪一档 | 横屏 1080p 够不够 | 落盘 |
+|---|---|---|---|
+| Pexels 视频 | `video_files[]` 里 height ≥1080 的 HD/UHD 直链 | 够（4K 可选） | `assets/broll/` 候选 → 选中后 `public/broll/` |
+| Pixabay 视频 | `videos.large`（4K）或 `videos.medium`（1080） | 够 | 同上 |
+| Mixkit 视频 | `{id}-1080.mp4` **优先**，无则 `-720`（720 只够竖屏 / 配角） | 1080 够；720 不够放大 | 同上 |
+| NASA 视频 | manifest 里 `~orig` 原始 mp4 | 够 | 同上 |
+| Pexels 图片 | `src.original`（全尺寸；`large2x` 只有 1880 宽） | 够 | `assets/stills/` 候选 → `public/stills/` |
+| Pixabay 图片 | `largeImageURL`（长边 ≤1280；`fullHDURL` / `imageURL` 需申请 full API access） | **不够**缓推，只当 720p / 竖屏 / 小图配角 | 同上 |
+| 网页长图 | Playwright 全页 2×（下文） | 够 | `public/pages/<slug>/` |
 
 ## 关键请求格式
 ```
@@ -52,6 +72,22 @@ POST https://graphql.lottiefiles.com/
 GET https://images-api.nasa.gov/search?q=satellite&media_type=video
 ```
 
+## 配图采集（图片作为正式素材的采集侧，2026-09-06；表现侧规则在 design-language / taxonomy）
+
+```
+# Pexels 图片（Header: Authorization: <KEY>，与视频同 key、同配额 200 次/时）
+GET https://api.pexels.com/v1/search?query=data%20center&orientation=landscape&size=large&per_page=15
+# 下载 photos[].src.original（全尺寸）；large2x=1880 宽只在竖屏/小图时够用。photos[].width/height 直接给真实尺寸，落盘前按上表核下限
+
+# Pixabay 图片（?key=<KEY>，100 次/分钟，24h 缓存条款同视频）
+GET https://pixabay.com/api/?key=<KEY>&q=server+room&image_type=photo&orientation=horizontal&min_width=1920&per_page=20&safesearch=true
+# 免费档只给 largeImageURL（长边 ≤1280）——min_width 过滤的是原图尺寸，下载到的仍是 1280 版；不够横屏缓推，只当备选
+```
+- 检索词与视频同一套英文视觉概念词（规则 1）；同一镜头**先搜视频再搜图片**，图片是降级不是并列首选（图片撑镜头要靠相机动，视频自带运动）。
+- 落盘 `assets/stills/`（候选）→ 选中的进 `public/stills/`，文件名 `<镜号>-<概念词>-<源>-<id>.<ext>`。
+- **每张图和每条视频一样进 `sources.md`**（规则 6）：检索词、源站、ID/URL、授权、真实尺寸。
+- 竖图放横屏、只有一张图的镜头：`bed-echo-blur◉`（同源模糊底床）是标准答案；多图：`still-layout-relay◉` / `stack-fan-out◉` / `gallery-wall-dolly◉` / `timeline-photo-strip◉`。
+
 ## 规则
 1. **搜索词一律英文**（唯一例外：Pixabay API 的 `lang=zh`）：中文口播稿分镜 → LLM 翻译成
    2-3 个英文视觉概念词（"大模型训练"→ `data center` / `GPU computing`）
@@ -60,7 +96,8 @@ GET https://images-api.nasa.gov/search?q=satellite&media_type=video
    这是 API 义务不是素材署名）
 4. logo 只做"指代品牌"使用（新闻/评论合理使用），不暗示背书
 5. Internet Archive 大陆网络不可达，不接入；Unsplash 需 production 审批 + 打点义务，不默认接入
-6. 选中的每条 B-roll 在 `sources.md` 登记：检索词、源站、素材 ID/URL、授权（与调研截图记账同一张表）
+6. 选中的每条 B-roll **和每张图片** 在 `sources.md` 登记：检索词、源站、素材 ID/URL、授权、真实尺寸（与调研截图记账同一张表）；
+   `preflight.py` 查 sources.md 是否存在
 
 ## 已排除源与死站（2026-08-28 调研，防旧教程误引）
 - **Videvo / Mazwai 已死**：域名 301 → Magnific（前 Freepik），免费层强制署名——不接入
@@ -72,3 +109,51 @@ GET https://images-api.nasa.gov/search?q=satellite&media_type=video
   Restricted License（仅个人非商用，明文禁 monetized YouTube/广告）——逐条核对页面授权标签，
   标 Restricted 的不下载；无 API
 - **Coverr API**：免费档 50 calls/h 且限开发环境，production 档收费；条款另禁 AI 训练用途（做视频不受影响）
+
+## 网页拍摄素材采集（Playwright，2026-09-04 定版）
+
+成片里的网页是被"拍"的（滚 / 巡 / 放大 / 划，选型表见 shot-design.md §2④「网页拍摄」），不是贴上去的截图——
+所以采集物不是一张 PNG，而是**一张全页 2× 长图 + 一份同会话 DOM 实测的坐标 JSON**，一起落 `public/pages/<slug>/`。
+
+- **全页 + 2× DPR**：`fullPage: true` + `deviceScaleFactor: 2`（视口宽 1280 → 长图宽 2560）。放大镜 1.8×、缓推 1.15、
+  巡游 zoom 都吃这张图；运镜共有纪律"素材分辨率 ≥ 画幅 × 最大缩放"（taxonomy.md 运镜）只有 2× 才够，1× 图一放大即糊
+- **坐标同会话实测**：截图前对每个要停 / 要放大 / 要划的目标取 `getBoundingClientRect()` + `scrollX/Y`，写成页面 CSS px 坐标
+  （选择器命中多个时取首个 w/h>0 的可见元素——隐藏导航里的零尺寸副本是实测撞过的坑），
+  连同 `dpr`、视口宽、页高存 `targets.json`——放大镜 `px/py`、荧光笔落点、滚动停点 `stopY` 全从这里读，**禁目测**
+  （SKILL.md §③ 2026-09-01 定版）。Remotion 里换算：图像像素 = CSS px × dpr，再乘 卡内容宽 / 长图宽 + 卡内边距
+  （shot-design.md §2④ 几何公式）
+- **截前清场**（长截图三大穿帮源）：`position: fixed/sticky` 的头部 / 侧栏改 `static`（否则全页图里粘性头重复出现或盖住正文）；
+  关掉 cookie / 登录 / 订阅弹层；懒加载图先把页面滚到底再回顶（否则长图下半截是灰占位块）
+- **字体与语言**：`locale: 'zh-CN'` + 等 `document.fonts.ready`，避免中文回退成宋体或方块
+- **记账**：`sources.md` 该条同时登记 URL、抓取时间、长图与 `targets.json` 路径——它既是成片素材也是调研证据存档
+  （"禁止只存链接"同一张表）
+- **不用浏览器录屏当素材**：录屏帧率不稳、懒加载 / 粘性头穿帮、无法对齐字级时间戳；滚动与运镜一律由 Remotion 在长图上做（seek-safe）
+
+```js
+// 最小采集脚本（node ≥18，需 playwright）：node capture.mjs <url> <slug> [css选择器 ...]
+// 产出 public/pages/<slug>/page.png（全页 2×）+ targets.json（选择器 → 页面 CSS px 坐标）
+import { chromium } from "playwright";
+import { mkdirSync, writeFileSync } from "node:fs";
+const [url, slug, ...sels] = process.argv.slice(2);
+const dir = `public/pages/${slug}`; mkdirSync(dir, { recursive: true });
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 2, locale: "zh-CN" });
+await page.goto(url, { waitUntil: "load" });
+await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {}); // GitHub 类长连接站点等不到 idle 就继续（实测会 30s 超时）
+// 清场：滚到底触发懒加载 → 回顶 → 等字体 → 粘性/固定元素改 static（evaluate 一律传字符串，见 scripts/shot-at.mjs 注释）
+await page.evaluate(`(async () => {
+  for (let y = 0; y < document.documentElement.scrollHeight; y += 800) { scrollTo(0, y); await new Promise(r => setTimeout(r, 120)); }
+  scrollTo(0, 0); await document.fonts.ready;
+  for (const el of document.querySelectorAll("*")) { const p = getComputedStyle(el).position; if (p === "fixed" || p === "sticky") el.style.position = "static"; }
+})()`);
+// 取首个「可见」命中（w/h>0）：GitHub 一类站点同一链接在隐藏导航里还有一份零尺寸副本，querySelector 会先撞上它
+const targets = await page.evaluate(`(sels => sels.map(s => {
+  const el = [...document.querySelectorAll(s)].find(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; });
+  if (!el) return { sel: s, missing: true };
+  const r = el.getBoundingClientRect(); return { sel: s, x: r.x + scrollX, y: r.y + scrollY, w: r.width, h: r.height }; }))(${JSON.stringify(sels)})`);
+const pageH = await page.evaluate("document.documentElement.scrollHeight");
+await page.screenshot({ path: `${dir}/page.png`, fullPage: true });
+writeFileSync(`${dir}/targets.json`, JSON.stringify({ url, capturedAt: new Date().toISOString(), viewport: 1280, dpr: 2, pageH, targets }, null, 2));
+await browser.close();
+console.log(`${dir}/page.png  ${pageH}px 高  targets=${targets.length}`);
+```

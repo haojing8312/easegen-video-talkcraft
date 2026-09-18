@@ -28,15 +28,22 @@ export interface TrackData {
   id: string;
   name: string;
   hidden?: boolean;
+  /** 系统层：照常参与渲染 / 导出的 z 序，但不在时间轨里显示、不可拖不可删——拆解出的"幕级覆盖"（黑震切帧 / 落幕压黑）这类
+   *  没有可编辑内容、只为保证成片一致的层用它（用户 2026-09-16：这层不需要显示出来） */
+  system?: boolean;
   clips: ClipData[];
 }
 
 export interface ProjectData {
   name: string;
+  /** 绑定的口播工程真实路径；缺省的旧存档不能自动写回任何接入工程。 */
+  kbProjectRoot?: string;
   fps: number;
   width: number;
   height: number;
   tracks: TrackData[];
+  /** 拆解导入 / 同步时见过的全部 kb- 单元 id：同步时"新鲜拆解里有、工程里没有、这里也有"= 用户删的，不复活 */
+  kbSeen?: string[];
 }
 
 let seq = 0;

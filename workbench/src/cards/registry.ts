@@ -5,6 +5,7 @@ import { countBadgeTitleCard } from "./count-badge-title";
 import { highlighterSweepCard } from "./highlighter-sweep";
 import { chapterTitleCardCard } from "./chapter-title-card";
 import { kouboPromoCard } from "./koubo-promo";
+import { kbMainCard } from "./kb-main";
 import {
   audioClipCard,
   kouboEnvironmentCard,
@@ -14,6 +15,7 @@ import {
   kouboSubtitlesCard,
   kouboWipeCard,
 } from "./koubo-units";
+import { KSKILL_CARDS } from "./koubo-skill";
 import { imageClipCard, videoClipCard } from "./media-cards";
 import { BG_CARDS } from "./background-cards";
 import { TEMPLATE_CARDS } from "./templateCards";
@@ -32,12 +34,15 @@ const CORE_CARDS: CardDef[] = [
   highlighterSweepCard,
   chapterTitleCardCard,
   kouboPromoCard,
+  kbMainCard,
   kouboShotCard,
   kouboHostCard,
   kouboSubtitleLineCard,
   kouboSubtitlesCard,
   kouboEnvironmentCard,
   kouboWipeCard,
+  // skill 标准工程的拆解单元（逐镜卡按接入工程的 SHOTS × SCENE_PARAMS 生成）
+  ...KSKILL_CARDS,
   audioClipCard,
   videoClipCard,
   imageClipCard,
